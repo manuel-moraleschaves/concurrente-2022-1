@@ -1,0 +1,4 @@
+hello_multiple
+hello_multiple_asan
+hello_multiple_msan
+hello_multiple_tsan
