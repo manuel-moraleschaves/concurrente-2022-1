@@ -9,7 +9,7 @@ int main() {
     pthread_t thread;
 
     if (pthread_create(&thread, NULL /*attr*/, run, (void*)2022) == EXIT_SUCCESS) {
-        printf("Hello word from main thread!\n");
+        printf("Hello world from main thread!\n");
         pthread_join(thread, NULL);
     } else {
         return EXIT_FAILURE;
@@ -18,10 +18,10 @@ int main() {
     return EXIT_SUCCESS;
 }
 
-void* run(void* param) {
-
-    printf("Hello word from secondary thread!\n");
-    printf("param: %p\n", param);
+void* run(void* param) {    
+    size_t value = (size_t)param; // siempre usar size_t en lugar de int
+    printf("Hello world from secondary thread!\n");
+    printf("param: %zu\n", value); // zu para size_t
 
     return NULL;
 }
