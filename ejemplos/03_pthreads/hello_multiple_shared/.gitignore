@@ -1,0 +1,5 @@
+hello_multiple_shared
+hello_multiple_shared_asan
+hello_multiple_shared_msan
+hello_multiple_shared_tsan
+hello_multiple_shared_ubsan

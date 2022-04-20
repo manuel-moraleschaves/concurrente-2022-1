@@ -1,0 +1,5 @@
+hello_multiple_dynamic
+hello_multiple_dynamic_asan
+hello_multiple_dynamic_msan
+hello_multiple_dynamic_tsan
+hello_multiple_dynamic_ubsan

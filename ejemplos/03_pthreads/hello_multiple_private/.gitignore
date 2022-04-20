@@ -1,0 +1,5 @@
+hello_multiple_private
+hello_multiple_private_asan
+hello_multiple_private_msan
+hello_multiple_private_tsan
+hello_multiple_private_ubsan
