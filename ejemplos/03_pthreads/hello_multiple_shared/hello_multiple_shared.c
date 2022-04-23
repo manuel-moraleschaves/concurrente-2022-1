@@ -40,10 +40,12 @@ int create_threads(size_t thread_count) {
         private_data_t* private_data = (private_data_t*)malloc(
                                     thread_count * sizeof(private_data_t));
         
-        shared_data_t* shared_data = (shared_data_t*)calloc(1,
-                                        sizeof(shared_data_t));
+        shared_data_t* shared_data = (shared_data_t*)calloc(1, sizeof(shared_data_t));
 
         if (private_data && shared_data) {
+
+            shared_data->thread_count = thread_count;
+
             for (size_t i = 0; i < thread_count; ++i) {
                 private_data[i].thread_num = i;
                 private_data[i].shared_data = shared_data;
