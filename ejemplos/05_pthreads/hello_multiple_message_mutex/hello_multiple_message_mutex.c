@@ -1,5 +1,8 @@
 // Copyright 2022 Jose Andres Mena <jose.menaarias@ucr.ac.cr>
-// EJEMPLO INCOMPLETO!
+// This example shows an incorrect use of pthread mutex. The main thread is
+// locking a mutex gaining its ownership but never unlocks it, passing the
+// responsibility to a secondary thread. Unlocking a mutex without its ownership
+// produces undefined/unknown behavior
 
 #include <errno.h>
 #include <stdio.h>
@@ -14,7 +17,8 @@ void* run(void*);
 typedef struct shared_data {
     size_t thread_count;
     char message[6];
-    pthread_mutex_t can_continue[2];
+    pthread_mutex_t can_print_hello;
+    pthread_mutex_t can_print_world;
 } shared_data_t;
 
 typedef struct private_data {
@@ -49,9 +53,9 @@ int create_threads(size_t thread_count) {
                                         sizeof(shared_data_t));
 
         if (private_data && shared_data) {
-            pthread_mutex_init(&shared_data->can_continue[0], NULL);
-            pthread_mutex_init(&shared_data->can_continue[1], NULL);
-            pthread_mutex_lock(&shared_data->can_continue[1]);
+            pthread_mutex_init(&shared_data->can_print_hello, NULL);
+            pthread_mutex_init(&shared_data->can_print_world, NULL);
+            pthread_mutex_lock(&shared_data->can_print_world);
 
             for (size_t i = 0; i < thread_count; ++i) {
                 private_data[i].thread_num = i;
@@ -67,13 +71,10 @@ int create_threads(size_t thread_count) {
                 pthread_join(threads[i], NULL);
             }
 
-            printf("Hello from the main thread. Shared message: %s\n",
-                    shared_data->message);
-
             free(private_data);
 
-            pthread_mutex_destroy(&shared_data->can_continue[0]);
-            pthread_mutex_destroy(&shared_data->can_continue[1]);
+            pthread_mutex_destroy(&shared_data->can_print_hello);
+            pthread_mutex_destroy(&shared_data->can_print_world);
             free(shared_data);
 
         } else {
@@ -93,39 +94,27 @@ int create_threads(size_t thread_count) {
     return EXIT_SUCCESS;
 }
 
+// 1. multiple threads
+// 2. shared memory
+// 3. WR - WW
+
 void* run(void* params) {
     private_data_t* data = (private_data_t*)params;
     shared_data_t* shared_data = data->shared_data;
-
+    
+    // mutex lock
     if (data->thread_num % 2 == 0) {
-        sscanf("hello", "%s", data->message);        
-
-        // if (pthread_mutex_trylock(&shared_data->can_continue[0]) == 0) {
-        //     pthread_mutex_lock(&shared_data->can_continue[0]);
-        //     sscanf("hello", "%s", shared_data->message);
-        //     pthread_mutex_unlock(&shared_data->can_continue[1]);
-        // }
-
-        pthread_mutex_lock(&shared_data->can_continue[0]);
-        sscanf("world", "%s", shared_data->message);
-        pthread_mutex_unlock(&shared_data->can_continue[1]);
+        pthread_mutex_lock(&shared_data->can_print_hello);
+        sscanf("hello", "%s", data->message);
+        printf("%zu: %s!\n", data->thread_num, data->message);
+        pthread_mutex_unlock(&shared_data->can_print_world);
         
     } else {
+        pthread_mutex_lock(&shared_data->can_print_world);
         sscanf("world", "%s", data->message);
-
-        // if (pthread_mutex_trylock(&shared_data->can_continue[1]) == 0) {
-        //     pthread_mutex_lock(&shared_data->can_continue[1]);
-        //     sscanf("world", "%s", shared_data->message);
-        //     pthread_mutex_unlock(&shared_data->can_continue[0]);
-        // }
-
-        pthread_mutex_lock(&shared_data->can_continue[1]);
-        sscanf("world", "%s", shared_data->message);
-        pthread_mutex_unlock(&shared_data->can_continue[0]);
-
+        printf("%zu: %s!\n", data->thread_num, data->message);
+        pthread_mutex_unlock(&shared_data->can_print_hello);
     }
-
-    printf("%zu: %s!\n", data->thread_num, data->message);
-
+    
     return NULL;
 }
