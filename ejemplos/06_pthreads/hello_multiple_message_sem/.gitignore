@@ -1,0 +1,5 @@
+hello_multiple_message_sem
+hello_multiple_message_sem_asan
+hello_multiple_message_sem_msan
+hello_multiple_message_sem_tsan
+hello_multiple_message_sem_ubsan
