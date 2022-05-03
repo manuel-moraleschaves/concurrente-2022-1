@@ -2,9 +2,9 @@
  
 ## Diagrama de la estructura de datos
 
-El siguiente diagrama UML muestra el diseño de la estructura de datos realizado:
+El siguiente diagrama UML muestra el diseño de la estructura de datos realizada:
 
-
+![img1](/design/diagrama_uml.png)
 
 ## Descripción general
 Pasos para resolver el problema:
@@ -17,5 +17,34 @@ Pasos para resolver el problema:
 ## Pseudocódigo
 A continuación se muestra el pseudocódigo del algoritmo principal utilizado para resolver el problema:
 ```
+Algoritmo Resolver_Tetris_DFS (tetris, secuencia_piezas, indice_pieza)
+Variables
+    entero cant_rotaciones, num_rotacion, num_columna, num_fila, puntaje_actual
+    figura_t figura
 
+Inicio
+    Si indice_pieza = tetris.profundidad + 1 Entonces
+        puntaje_actual -> Obtener_Puntaje (tetris)
+        
+        Si puntaje_actual < puntaje_minimo Entonces
+            puntaje_minimo <- puntaje_actual
+            tetris_final = tetris
+        Fin Si
+    Fin Si
+
+    cant_rotaciones <- Obtener_Num_Rotaciones (secuencia_piezas[indice_pieza])
+
+    Para num_rotacion <- 0 Hasta cant_rotaciones Hacer
+        figura <- Obtener_Figura (secuencia_piezas[indice_pieza], num_rotacion)
+
+        Para num_columna <- 0 Hasta tetris.columnas Hacer
+            Si Posicion_Valida (tetris, figura, num_columna) Entonces
+                num_fila <- Colocar_Figura (tetris, pieza, num_columna)
+                Resolver_Tetris_DFS (tetris, secuencia de piezas, indice_pieza + 1)                
+                Quitar_Figura (tetris, figura, num_fila, num_columna)
+            Fin Si   
+        Fin Para
+    Fin Para
+
+Fin Algoritmo
 ```
