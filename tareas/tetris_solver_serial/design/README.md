@@ -4,7 +4,7 @@
 
 El siguiente diagrama UML muestra el diseño de la estructura de datos realizada:
 
-![img1](/design/diagrama_uml.png)
+![img1](./diagrama_uml.png)
 
 ## Descripción general
 Pasos para resolver el problema:
