@@ -1,0 +1,5 @@
+hello_ordered_sem
+hello_ordered_sem_asan
+hello_ordered_sem_msan
+hello_ordered_sem_tsan
+hello_ordered_sem_ubsan
