@@ -1,6 +1,7 @@
 APPNAME=$(shell basename $(shell pwd))
-HEADERS=$(wildcard *.h)
-SOURCES=$(wildcard *.c)
+DIRS=src
+HEADERS=$(wildcard $(DIRS:%=%/*.h))
+SOURCES=$(wildcard $(DIRS:%=%/*.c))
 OBJECTS=$(SOURCES:%.c=build/%.o)
 EXEFILE=bin/$(APPNAME)
 
@@ -47,7 +48,7 @@ build/%.o: %.c | $$(@D)/.
 
 .PHONY: memcheck
 memcheck:
-	valgrind --tool=callgrind $(EXEFILE)
+	valgrind $(EXEFILE)
 
 .PHONY: helgrind
 helgrind:
