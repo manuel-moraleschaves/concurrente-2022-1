@@ -6,8 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "tetris_figure_factory.h"
-#include "tetris_read_file.h"
+#include "tetris_state.h"
 
 
 int main(int argc, char** argv) {
@@ -33,6 +32,8 @@ int main(int argc, char** argv) {
             fprintf(stderr, "Error: invalid file content.\n");
             return 3;
         }
+
+        solve_tetris_dfs(tetris, 0);
 
         destroy_tetris(tetris);
         fclose(file);
