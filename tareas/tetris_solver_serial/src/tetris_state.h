@@ -17,11 +17,11 @@ typedef struct {
     int sequence_count;
     char* figure_sequence;
     int min_height;
-    level_t* levels;
+    // level_t* levels;
 } tetris_t;
 
 tetris_t* read_tetris(FILE* file);
 void destroy_tetris(tetris_t* tetris);
-int solve_tetris_dfs(tetris_t* tetris, int piece_index);
+int solve_tetris_dfs(tetris_t* tetris, int piece_index, FILE* file);
 
 #endif
