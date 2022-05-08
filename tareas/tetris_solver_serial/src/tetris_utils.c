@@ -33,7 +33,7 @@ void free_matrix(const size_t row_count, void** matrix) {
 
 void print_matrix(const size_t row_count, char** matrix) {
     if (matrix) {
-        for (int row = row_count - 1; row >= 0; --row) {
+        for (size_t row = 0; row < row_count; ++row) {
             printf("%s\n", (char*) matrix[row]);
         }
     }
@@ -41,7 +41,7 @@ void print_matrix(const size_t row_count, char** matrix) {
 
 void print_matrix2(const size_t row_count, char** matrix, FILE* file) {
     if (matrix) {
-        for (int row = row_count - 1; row >= 0; --row) {
+        for (size_t row = 0; row < row_count; ++row) {
             fprintf(file, "%s\n", (char*) matrix[row]);
         }
     }

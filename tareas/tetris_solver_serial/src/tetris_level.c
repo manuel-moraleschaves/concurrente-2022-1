@@ -18,8 +18,8 @@ level_t* save_level(char figure, int shape, int num_rows,
         return NULL;
     }
 
-    for (int i = 0; i < num_rows; i++) {
-        for (int j = 0; j < num_cols; j++) {
+    for (int i = 0; i < num_rows; ++i) {
+        for (int j = 0; j < num_cols; ++j) {
             level->matrix[i][j] = matrix[i][j];
         }
     }
