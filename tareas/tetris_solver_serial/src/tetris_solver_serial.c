@@ -24,6 +24,7 @@ int main(int argc, char** argv) {
     FILE* file = fopen(file_name, "r");  // read only
 
     if (file) {
+        // Lectura del estado inicial desde el archivo de entrada
         tetris_t* tetris = read_tetris(file);
 
         if (!tetris) {
@@ -34,8 +35,10 @@ int main(int argc, char** argv) {
         // Para generar un archivo de control
         FILE* file2 = fopen("Out.txt", "w");
 
+        // Rutina recursiva para la soluciión del tetris
         solve_tetris_dfs(tetris, 0, file2);
 
+        // Generación de archivos finales
         char output_name[50];
         FILE* out_file;
         for (int i = 0; i <= tetris->depth; ++i) {
@@ -50,6 +53,7 @@ int main(int argc, char** argv) {
                 tetris->levels[i].matrix, out_file);
         }
 
+        // Liberación de memoria
         destroy_tetris(tetris);
         fclose(file);
         fclose(out_file);

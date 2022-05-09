@@ -5,6 +5,7 @@
 
 int save_level(level_t* level, char figure, int shape, int num_rows,
         int num_cols, char** matrix) {
+    // Se libera memoria si ya tenía una matriz
     if (level->matrix) {
         free_matrix(num_rows, (void**)level->matrix);
     }
@@ -19,6 +20,8 @@ int save_level(level_t* level, char figure, int shape, int num_rows,
         free(level);
         return 0;
     }
+
+    // Se copia la matriz
     for (int i = 0; i < num_rows; ++i) {
         for (int j = 0; j < num_cols; ++j) {
             level->matrix[i][j] = matrix[i][j];
