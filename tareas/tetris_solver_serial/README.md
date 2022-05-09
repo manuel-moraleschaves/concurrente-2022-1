@@ -137,11 +137,55 @@ Z
 Si para un estado dado, el programa no pudo encontrar del todo una posición valida para colocar la figura correspondiente al nivel, entonces **no** se genera ningún archivo de salida para dicho nivel ni para los siguientes.
 
 ## Manual de uso
-Indica cómo construir (compilar) la solución, y cómo correrla. Conviene proveer ejemplos de cómo correr el programa, sea de forma interactiva, o en lote redireccionando la entrada estándar.
+Para compilar el programa se puede utilizar el makefile incluido de la siguiente manera:
 
-```c
-int read_values(const size_t value_count, double values[]);
+- Compilar normal
 ```
+make
+```
+
+- Compilar asan
+```
+make asan
+```
+
+- Compilar msan
+```
+make msan
+```
+
+Se puede ejecutar el programa sin enviar ningún parámetro y el mismo tomará por default el archivo ./test/Test1.txt:
+```
+./bin/tetris_solver_serial
+```
+
+En caso de querer utilizar otro archivo de pruebas se debe ejecutar de la siguiente manera:
+```
+./bin/tetris_solver_serial ./test/Test2.txt
+```
+
+También, se pueden utilizar los siguientes comandos adicionales:
+
+- Linter
+```
+make
+make lint
+```
+
+- Memchek
+```
+make
+make memcheck
+```
+
+- Helgrind
+```
+make
+make helgrind
+```
+
+Finalmente, el programa creará los archivos correspondientes según lo mencionado anteriormente y de forma adicional, creará un archivo Out.txt que muestra una secuencia paso a paso de lo realizado internamente. Esto con fines de debugueo o de entender mejor su ejecución.
+
 
 ## Créditos
 Desarrollado por **Manuel Morales Chaves**.  
@@ -151,6 +195,6 @@ Desarrollado por **Manuel Morales Chaves**.
 Recursos consultados/utilizados:
 - [File Input and Output in C](https://www.cs.utah.edu/~germain/PPS/Topics/C_Language/file_IO.html).
 
-- Recurso 2.
+- [Depth First Search or DFS for a Graph](https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/).
 
-- Recurso 3.
+- [Depth First Search](https://iq.opengenus.org/depth-first-search/).
