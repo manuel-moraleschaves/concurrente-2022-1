@@ -63,7 +63,7 @@ lint:
 
 .PHONY: gitignore
 gitignore:
-	echo "bin/ build/" | tr " " "\n" > .gitignore
+	echo "bin/ build/ Out.txt tetris_play_*" | tr " " "\n" > .gitignore
 
 .PHONY: clean
 clean:
