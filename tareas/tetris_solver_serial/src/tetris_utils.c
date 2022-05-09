@@ -39,7 +39,7 @@ void print_matrix(const size_t row_count, char** matrix) {
     }
 }
 
-void print_matrix2(const size_t row_count, char** matrix, FILE* file) {
+void print_matrix_file(const size_t row_count, char** matrix, FILE* file) {
     if (matrix) {
         for (size_t row = 0; row < row_count; ++row) {
             fprintf(file, "%s\n", (char*) matrix[row]);

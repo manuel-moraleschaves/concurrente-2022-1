@@ -28,11 +28,11 @@ ubsan: CFLAGS += -fsanitize=undefined
 
 .SECONDEXPANSION:
 
-default: $(EXEFILE)
+default: clean $(EXEFILE)
 debug: $(EXEFILE)
 release: $(EXEFILE)
-asan: $(EXEFILE)
-msan: $(EXEFILE)
+asan: clean $(EXEFILE)
+msan: clean $(EXEFILE)
 tsan: $(EXEFILE)
 ubsan: $(EXEFILE)
 

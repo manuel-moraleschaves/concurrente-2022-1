@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "tetris_state.h"
+#include "tetris_utils.h"
 
 
 int main(int argc, char** argv) {
@@ -17,10 +18,7 @@ int main(int argc, char** argv) {
             fprintf(stderr, "Error: invalid file name.\n");
             return 1;
         }
-    }  // else {
-    //    fprintf(stderr, "Error: please provide a initial file.\n");
-    //    return 2;
-    //}
+    }
 
     printf("File Name: %s\n", file_name);
     FILE* file = fopen(file_name, "r");  // read only
@@ -33,21 +31,34 @@ int main(int argc, char** argv) {
             return 3;
         }
 
-        // TODO(manum): BORRAR
+        // Para generar un archivo de control
         FILE* file2 = fopen("Out.txt", "w");
 
         solve_tetris_dfs(tetris, 0, file2);
 
+        char output_name[50];
+        FILE* out_file;
+        for (int i = 0; i <= tetris->depth; ++i) {
+            sprintf(output_name, "tetris_play_%i.txt", i);
+            out_file = fopen(output_name, "w");
+            fprintf(out_file, "%zu\n", tetris->id);
+            fprintf(out_file, "%c\n", tetris->figure_sequence[i]);
+            fprintf(out_file, "%i\n", tetris->levels[i].shape);
+            fprintf(out_file, "%i\n", tetris->rows);
+            fprintf(out_file, "%i\n", tetris->columns);
+            print_matrix_file(tetris->rows,
+                tetris->levels[i].matrix, out_file);
+        }
+
         destroy_tetris(tetris);
         fclose(file);
-        // TODO(manum): BORRAR
+        fclose(out_file);
         fclose(file2);
 
     } else {
         fprintf(stderr, "Error: could not open the file %s.\n", file_name);
         return 4;
     }
-
 
     return EXIT_SUCCESS;
 }

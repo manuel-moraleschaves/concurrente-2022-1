@@ -17,7 +17,7 @@ typedef struct {
     int sequence_count;
     char* figure_sequence;
     int min_height;
-    // level_t* levels;
+    level_t* levels;
 } tetris_t;
 
 tetris_t* read_tetris(FILE* file);

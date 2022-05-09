@@ -12,7 +12,7 @@ typedef struct {
     char** matrix;
 } level_t;
 
-level_t* save_level(char figure, int shape, int num_rows,
+int save_level(level_t* level, char figure, int shape, int num_rows,
         int num_cols, char** matrix);
 
 #endif

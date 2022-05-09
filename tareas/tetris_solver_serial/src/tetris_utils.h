@@ -11,6 +11,6 @@ void** create_matrix(size_t row_count,
 void free_matrix(const size_t row_count, void** matrix);
 
 void print_matrix(const size_t row_count, char** matrix);
-void print_matrix2(const size_t row_count, char** matrix, FILE* file);
+void print_matrix_file(const size_t row_count, char** matrix, FILE* file);
 
 #endif
