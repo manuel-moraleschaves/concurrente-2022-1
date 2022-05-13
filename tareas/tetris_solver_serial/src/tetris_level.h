@@ -7,27 +7,48 @@
 #include <stdlib.h>
 
 /**
- * @brief Estructura para manejo de los niveles.
- * @details Contiene la letra de la figura, su rotación y la matriz de posiciones.
+ * @brief Estructura tipo cola para manejo de los niveles.
+ * @details Contiene la letra de la figura, su rotación, la matriz de posiciones y un puntero al nivel siguiente.
  */
-typedef struct {
+struct level_t {
     char figure;
-    int shape;
+    int rotation;
     char** matrix;
-} level_t;
+    struct level_t* next;
+};
 
 /**
- * @brief Rutina para guardar un nivel.
- * @details Almacena la información correspondiente a un nivel en el puntero recibido.
- * @param level Puntero donde se guardará la información.
- * @param figure Letra de la figura colocada en ese nivel.
- * @param shape Rotación de la figura colocada en ese nivel.
+ * @brief Rutina para crear un nivel.
+ * @details Crea un nuevo nivel con los datos del estado del tetris.
+ * @param figure Letra de la figura colocada en el nivel.
+ * @param rotation rotación de la figura colocada en el nivel.
  * @param num_rows Cantidad de filas de la matriz.
  * @param num_cols Cantidad de columnas de la matriz.
- * @param matrix Puntero a la matriz del estado actual del juego que será almacenada en el nivel.
- * @return Un valor entero: 0 en caso de error, 1 en caso de éxito.
+ * @param matrix Matriz con los datos de las figuras que tiene el nivel.
+ * @return Puntero al nivel creado.
  */
-int save_level(level_t* level, char figure, int shape, int num_rows,
-        int num_cols, char** matrix);
+struct level_t* create_level(char figure, int rotation, int num_rows,
+                             int num_cols, char** matrix);
+
+/**
+ * @brief Rutina para clonar un nivel.
+ * @details Clona los datos de un nivel origen a un nivel de destino.
+ * @param source Puntero al nivel con los datos de origen.
+ * @param dest Puntero al nivel de destino al que se clonarán los datos.
+ * @param num_rows Cantidad de filas de la matriz.
+ * @param num_cols Cantidad de columnas de la matriz.
+ * @return void.
+ */
+void clone_level(struct level_t* source, struct level_t* dest,
+                 int num_rows, int num_cols);
+
+/**
+ * @brief Rutina para destruir los niveles.
+ * @details Destruye un nodo base y todos sus nodos siguientes, así como sus matrices.
+ * @param source Puntero al nivel base.
+ * @param num_rows Cantidad de filas de la matriz.
+ * @return void.
+ */
+void destroy_levels(struct level_t* source , int num_rows);
 
 #endif

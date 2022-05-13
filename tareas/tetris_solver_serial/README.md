@@ -184,7 +184,7 @@ make
 make helgrind
 ```
 
-Finalmente, el programa creará los archivos correspondientes según lo mencionado anteriormente y de forma adicional, creará un archivo Out.txt que muestra una secuencia paso a paso de lo realizado internamente. Esto con fines de debugueo o de entender mejor su ejecución.
+Finalmente, el programa creará los archivos de salida correspondientes según lo mencionado anteriormente para cada uno de los niveles en los que se colocó una figura.
 
 
 ## Créditos

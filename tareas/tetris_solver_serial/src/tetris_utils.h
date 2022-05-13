@@ -44,4 +44,14 @@ void print_matrix(const size_t row_count, char** matrix);
  */
 void print_matrix_file(const size_t row_count, char** matrix, FILE* file);
 
+/**
+ * @brief Rutina para clonar una matriz.
+ * @details Crear una nueva matriz y clona los datos de la amtriz origen.
+ * @param matrix Matriz que se desea clonar.
+ * @param row_count Cantidad de filas de la matriz.
+ * @param col_count Cantidad de columnas de la matriz.
+ * @return La nueva matriz char** clonada.
+ */
+char** clone_matrix(char** matrix, size_t row_count, size_t col_count);
+
 #endif

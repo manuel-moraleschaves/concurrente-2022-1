@@ -3,30 +3,58 @@
 #include "tetris_level.h"
 #include "tetris_utils.h"
 
-int save_level(level_t* level, char figure, int shape, int num_rows,
-        int num_cols, char** matrix) {
-    // Se libera memoria si ya tenía una matriz
-    if (level->matrix) {
-        free_matrix(num_rows, (void**)level->matrix);
+
+struct level_t* create_level(char figure, int rotation, int num_rows,
+                             int num_cols, char** matrix) {
+    struct level_t* new_level = malloc(sizeof(struct level_t));
+
+    if (!new_level) {
+        return NULL;
     }
 
-    level->figure = figure;
-    level->shape = shape;
-    level->matrix = (char**)create_matrix(num_rows,
-                        num_cols + 1, sizeof(char));
+    new_level->figure = figure;
+    new_level->rotation = rotation;
+    new_level->next = NULL;
 
-    if (!level->matrix) {
-        fprintf(stderr, "Error: could not create the level record.\n");
-        free(level);
-        return 0;
+    new_level->matrix = clone_matrix(matrix, num_rows, num_cols);
+
+    if (!new_level->matrix) {
+        free(new_level);
+        return NULL;
     }
 
-    // Se copia la matriz
-    for (int i = 0; i < num_rows; ++i) {
-        for (int j = 0; j < num_cols; ++j) {
-            level->matrix[i][j] = matrix[i][j];
-        }
+    return new_level;
+}
+
+void clone_level(struct level_t* source, struct level_t* dest,
+                 int num_rows, int num_cols) {
+    struct level_t* current = dest;
+
+    // Destruye los niveles siguientes que tenga el destino
+    if (dest->next) {
+        destroy_levels(dest->next, num_rows);
     }
 
-    return 1;
+    current = source->next;
+    while (current != NULL) {
+        dest->next = create_level(current->figure, current->rotation, num_rows,
+                                  num_cols, current->matrix);
+        current = current->next;
+        dest = dest->next;
+    }
+}
+
+void destroy_levels(struct level_t* source , int num_rows) {
+    if (source->next) {
+        struct level_t * temp = source->next;
+        struct level_t * next;
+        do {
+            next = temp->next;
+            free_matrix(num_rows, (void**) temp->matrix);
+            free(temp);
+            temp = next;
+        } while (temp);
+    }
+    free_matrix(num_rows, (void**)source->matrix);
+    free(source);
 }

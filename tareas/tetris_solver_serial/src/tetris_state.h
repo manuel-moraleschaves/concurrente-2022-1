@@ -11,7 +11,7 @@
 /**
  * @brief Estructura para manejo del estado del tetris.
  * @details Contiene el id del juego, la profundidad, la cantidad de columnas, la matriz de posiciones,
- * la catidad de figuras que están cayendo, la secuencia de esas figuras y arreglo de niveles.
+ * la catidad de figuras que están cayendo, la secuencia de esas figuras y el nodo base de los niveles.
  */
 typedef struct {
     size_t id;
@@ -22,7 +22,7 @@ typedef struct {
     int sequence_count;
     char* figure_sequence;
     int min_height;
-    level_t* levels;
+    struct level_t* levels;
 } tetris_t;
 
 /**
@@ -47,8 +47,10 @@ void destroy_tetris(tetris_t* tetris);
  * @param tetris Puntero al estado del tetris.
  * @param piece_index Índice de la figura que está cayendo.
  * @param file Puntero al archivo secundario utilizado para control.
+ * @param base_level Puntero al nodo base de los niveles.
  * @return Un valor entero: 0 en caso de algún, 1 en caso de éxito.
  */
-int solve_tetris_dfs(tetris_t* tetris, int piece_index, FILE* file);
+int solve_tetris_dfs(tetris_t* tetris, int piece_index,
+                     struct level_t* base_level);
 
 #endif

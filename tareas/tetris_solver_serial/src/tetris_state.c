@@ -31,7 +31,7 @@ int valid_column(tetris_t* tetris, figure_t* figure, int num_col);
  * @return Un valor entero que representa el número de fila donde se insertó la
  * figura, o un -1 en caso de no haber logrado la inserción.
  */
-int place_figure(tetris_t* tetris, figure_t* figure, int num_co);
+int place_figure(tetris_t* tetris, figure_t* figure, int num_col);
 
 /**
  * @brief Rutina para encontrar las colisiones de una figura.
@@ -157,7 +157,8 @@ tetris_t* read_tetris(FILE* file) {
     printf("Figure sequence: %s\n", tetris->figure_sequence);
 
     // Creación de los niveles
-    tetris->levels = (level_t*) calloc(tetris->depth + 1, sizeof(level_t));
+    tetris->levels = create_level('B', 0, tetris->rows, tetris->columns,
+                                  tetris->matrix);
 
     if (!tetris->levels) {
         fprintf(stderr, "Error: could not create the levels.\n");
@@ -166,35 +167,43 @@ tetris_t* read_tetris(FILE* file) {
     }
 
     // Inicialización de la altura mínima
-    tetris->min_height = tetris->rows;
+    tetris->min_height = tetris->rows + 1;
 
     return tetris;
 }
 
 void destroy_tetris(tetris_t* tetris) {
+    printf("\nDENTRO DE destroy_tetris...\n");
+
     free_matrix(tetris->rows, (void**)tetris->matrix);
-    for (int i = 0; i <= tetris->depth; ++i) {
-        free_matrix(tetris->rows, (void**)tetris->levels[i].matrix);
-    }
-    free(tetris->levels);
+    printf(" liberada la matrix...\n");
+
+    destroy_levels(tetris->levels, tetris->rows);
+    printf(" liberado los niveles...\n");
+
     free(tetris->figure_sequence);
+    printf(" liberado figure_sequence...\n");
+
     free(tetris);
+    printf(" liberado todo tetris...\n");
 }
 
-int solve_tetris_dfs(tetris_t* tetris, int piece_index, FILE* file) {
-    fprintf(file, "\n\n**INICIO DFS**\npiece: %c - piece_index: %d\n",
-        tetris->figure_sequence[piece_index], piece_index);
-
+int solve_tetris_dfs(tetris_t* tetris, int piece_index,
+                     struct level_t* base_level) {
     // Si es el último nivel
     if (piece_index == tetris->depth + 1) {
         int current_height = calculate_height(tetris);
         // Se actualiza la altura mínima alcanzada
         if (current_height < tetris->min_height) {
             tetris->min_height = current_height;
-            fprintf(file, "saliendo DFS con %i...\n\n", 1);
+
+            // Clona la secuencia de niveles hacia el estado del tetris
+            if (base_level) {
+                clone_level(base_level, tetris->levels, tetris->rows,
+                            tetris->columns);
+            }
             return 1;
         } else {
-            fprintf(file, "saliendo DFS con %i...\n\n", 0);
             return 0;
         }
     }
@@ -212,7 +221,6 @@ int solve_tetris_dfs(tetris_t* tetris, int piece_index, FILE* file) {
         for (int num_col = 0; num_col < tetris->columns; ++num_col) {
             // TODO(manum): optimizar
             if (calculate_height(tetris) > tetris->min_height) {
-                fprintf(file, "va a continuar...\n");
                 continue;
             }
 
@@ -223,57 +231,38 @@ int solve_tetris_dfs(tetris_t* tetris, int piece_index, FILE* file) {
 
                 // Si logró colocar la figura
                 if (num_row != -1) {
-                    fprintf(file, "\n  PIEZA COLOCADA!\n");
-                    print_matrix_file(tetris->rows, tetris->matrix, file);
+                    // Crea el registro del nivel
+                    struct level_t* level =
+                        create_level(tetris->figure_sequence[piece_index],
+                                     rotation, tetris->rows, tetris->columns,
+                                     tetris->matrix);
+                    if (level) {
+                        // Llegar al nodo correspondiente al nivel
+                        struct level_t * current = base_level;
+                        for (int i = 0; i < piece_index; ++i) {
+                            current = current->next;
+                        }
+
+                        // Si tiene más niveles siguientes los elimina
+                        if (current->next) {
+                            destroy_levels(current->next, tetris->rows);
+                        }
+
+                        // Agrega el nuevo nivel
+                        current->next = level;
+                        current->next->next = NULL;
+                    }
 
                     // Llamado recursivo con la siguiente figura
-                    result = solve_tetris_dfs(tetris, piece_index + 1, file);
-                    fprintf(file, "  resultado dfs para el %i: %i\n",
-                        piece_index, result);
+                    result = solve_tetris_dfs(tetris, piece_index + 1,
+                                              base_level);
 
-                    // Si obtuvo un mejor puntaje (nueva altura mínima)
-                    if (result == 1) {
-                        // Guarda el estado actual
-                        result = save_level(&tetris->levels[piece_index],
-                                    tetris->figure_sequence[piece_index],
-                                    rotation, tetris->rows, tetris->columns,
-                                    tetris->matrix);
-
-                        if (result == 1) {
-                            fprintf(file, "  level %i saved!\n",
-                                piece_index);
-                            print_matrix_file(tetris->rows,
-                                tetris->levels[piece_index].matrix, file);
-                            fprintf(file, "----------\n");
-                        }
-                    }
                     // Remueve la figura colocada
                     remove_figure(tetris, figure, num_row, num_col);
-                    fprintf(file, "  PIEZA REMOVIDA!\n");
-                    print_matrix_file(tetris->rows, tetris->matrix, file);
-                    fprintf(file, "----------\n");
-                    if (result == 1 && piece_index > 0) {
-                        // Guarda el estado actual para el nivel anterior
-                        result = save_level(&tetris->levels[piece_index-1],
-                                    tetris->figure_sequence[piece_index],
-                                    rotation, tetris->rows, tetris->columns,
-                                    tetris->matrix);
-
-                        if (result == 1) {
-                            fprintf(file, "  level %i saved!\n",
-                                    piece_index-1);
-                            print_matrix_file(tetris->rows,
-                                tetris->levels[piece_index-1].matrix, file);
-                            fprintf(file, "----------\n");
-                        }
-                    }
-                } else {
-                    fprintf(file, " NO SE PUDO COLOCAR LA PIEZA!\n");
                 }
             }
         }
     }
-    fprintf(file, "saliendo DFS con %i...\n\n", result);
     return result;
 }
 
@@ -318,11 +307,12 @@ int place_figure(tetris_t* tetris, figure_t* figure, int num_col) {
     if (num_row >= 0) {
         insert_figure(tetris, figure, num_row, num_col);
     }
+
     return num_row;
 }
 
 int figure_collides(tetris_t* tetris, figure_t* figure,
-        int num_row, int num_col) {
+    int num_row, int num_col) {
     // Recorre las columnas y filas para encontrar colisiones
     for (int i = 0; i < figure->height; ++i) {
         for (int j = 0; j < figure->width; ++j) {
@@ -332,6 +322,7 @@ int figure_collides(tetris_t* tetris, figure_t* figure,
             }
         }
     }
+
     return 0;
 }
 

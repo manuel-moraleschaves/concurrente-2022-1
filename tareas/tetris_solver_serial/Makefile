@@ -33,8 +33,8 @@ debug: $(EXEFILE)
 release: $(EXEFILE)
 asan: clean $(EXEFILE)
 msan: clean $(EXEFILE)
-tsan: $(EXEFILE)
-ubsan: $(EXEFILE)
+tsan: clean $(EXEFILE)
+ubsan: clean $(EXEFILE)
 
 $(EXEFILE): $(OBJECTS) | $$(@D)/.
 	$(CC) $(CFLAGS) $^ -o $@ $(LIBS) $(LIBS2)
@@ -63,7 +63,7 @@ lint:
 
 .PHONY: gitignore
 gitignore:
-	echo "bin/ build/ Out.txt tetris_play_*" | tr " " "\n" > .gitignore
+	echo "bin/ build/ tetris_play_*" | tr " " "\n" > .gitignore
 
 .PHONY: clean
 clean:
