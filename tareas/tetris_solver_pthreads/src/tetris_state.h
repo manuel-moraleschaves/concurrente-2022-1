@@ -42,15 +42,23 @@ tetris_t* read_tetris(FILE* file);
 void destroy_tetris(tetris_t* tetris);
 
 /**
- * @brief Rutina para la solución del tetris.
- * @details Rutina recursiva que mediante un algoritmo de Búsqueda en Profundidad soluciona el tetris.
+ * @brief Rutina recursiva y paralela para la solución del tetris.
+ * @details Rutina recursiva que mediante hilos y un algoritmo de Búsqueda en Profundidad soluciona el tetris.
  * @param tetris Puntero al estado del tetris.
  * @param piece_index Índice de la figura que está cayendo.
- * @param file Puntero al archivo secundario utilizado para control.
  * @param base_level Puntero al nodo base de los niveles.
  * @return Un valor entero: 0 en caso de algún, 1 en caso de éxito.
  */
 int solve_tetris_dfs(tetris_t* tetris, int piece_index,
                      struct level_t* base_level);
+
+/**
+ * @brief Rutina para iniciar la solución del tetris.
+ * @details Recorre el nivel 0 y llama a la rutina recursiva dfs.
+ * @param tetris Puntero al estado del tetris.
+ * @param base_level Puntero al nodo base de los niveles.
+ * @return Un valor entero: 0 en caso de algún, 1 en caso de éxito.
+ */
+int solve_tetris(tetris_t* tetris, struct level_t* base_level);
 
 #endif

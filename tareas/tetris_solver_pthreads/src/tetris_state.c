@@ -198,3 +198,57 @@ int solve_tetris_dfs(tetris_t* tetris, int piece_index,
     }
     return result;
 }
+
+int solve_tetris(tetris_t* tetris, struct level_t* base_level) {
+    int num_rotations =
+        get_tetris_figure_num_rotations(tetris->figure_sequence[0]);
+    int result = 0;
+
+    // Se recorren todas las posibles rotaciones de la figura
+    for (int rotation = 0; rotation < num_rotations; ++rotation) {
+        figure_t* figure =
+            get_tetris_figure(tetris->figure_sequence[0], rotation);
+
+        // Se recorren todas las columnas del tablero
+        for (int num_col = 0; num_col < tetris->columns; ++num_col) {
+            // TODO(manum): optimizar
+            if (calculate_height(tetris) > tetris->min_height) {
+                continue;
+            }
+
+            // Se valida si la figura cabe en la columna
+            if (valid_column(tetris, figure, num_col)) {
+                // Intenta colocar la figura en la fila más baja
+                int num_row = place_figure(tetris, figure, num_col);
+
+                // Si logró colocar la figura
+                if (num_row != -1) {
+                    // Crea el registro del nivel
+                    struct level_t* level =
+                        create_level(tetris->figure_sequence[0],
+                                     rotation, tetris->rows, tetris->columns,
+                                     tetris->matrix);
+                    if (level) {
+                        struct level_t * current = base_level;
+
+                        // Si tiene más niveles siguientes los elimina
+                        if (current->next) {
+                            destroy_levels(current->next, tetris->rows);
+                        }
+
+                        // Agrega el nuevo nivel
+                        current->next = level;
+                        current->next->next = NULL;
+                    }
+
+                    // Llamado a rutina recursiva con la siguiente figura
+                    result = solve_tetris_dfs(tetris, 1, base_level);
+
+                    // Remueve la figura colocada
+                    remove_figure(tetris, figure, num_row, num_col);
+                }
+            }
+        }
+    }
+    return result;
+}

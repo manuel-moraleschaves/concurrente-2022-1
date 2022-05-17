@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
 
         // Rutina recursiva para la soluciión del tetris
         printf("\nResolviendo tetris...\n");
-        solve_tetris_dfs(tetris, 0, /* file2,*/ base_level);
+        solve_tetris(tetris, base_level);
         printf("\nTerminado todo el DFS...\n");
 
         // Generación de archivos finales
