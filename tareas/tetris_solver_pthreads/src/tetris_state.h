@@ -5,8 +5,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "tetris_level.h"
+#include "tetris_figure_factory.h"
 
 /**
  * @brief Estructura para manejo del estado del tetris.
@@ -24,6 +26,28 @@ typedef struct {
     int min_height;
     struct level_t* levels;
 } tetris_t;
+
+typedef struct {
+    int rotation;
+    int column;
+} possible_plays_t;
+
+typedef struct {
+    size_t thread_count;
+    int plays_count;
+    possible_plays_t* plays;
+    tetris_t* tetris;
+    pthread_mutex_t can_access_min_height;
+    pthread_mutex_t can_access_levels;
+} shared_data_t;
+
+typedef struct {
+    size_t thread_number;
+    shared_data_t *shared_data;
+} private_data_t;
+
+
+
 
 /**
  * @brief Rutina para leer el estado inicial del tetris.
@@ -50,15 +74,17 @@ void destroy_tetris(tetris_t* tetris);
  * @return Un valor entero: 0 en caso de algún, 1 en caso de éxito.
  */
 int solve_tetris_dfs(tetris_t* tetris, int piece_index,
-                     struct level_t* base_level);
+                     struct level_t* base_level, shared_data_t* shared_data);
 
 /**
  * @brief Rutina para iniciar la solución del tetris.
  * @details Recorre el nivel 0 y llama a la rutina recursiva dfs.
- * @param tetris Puntero al estado del tetris.
- * @param base_level Puntero al nodo base de los niveles.
- * @return Un valor entero: 0 en caso de algún, 1 en caso de éxito.
+ * @param data Puntero a los datos privados del hilo.
+ * @return void.
  */
-int solve_tetris(tetris_t* tetris, struct level_t* base_level);
+void *solve_tetris(void *data);
+
+
+tetris_t* clone_tetris(shared_data_t* shared_data);
 
 #endif
