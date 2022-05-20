@@ -27,11 +27,23 @@ typedef struct {
     struct level_t* levels;
 } tetris_t;
 
+/**
+ * @brief Estructura para almacenar todas las posibles jugadas de la primera letra.
+ * @details Contiene el numero de rotacion de la figura y el numero de la columna
+ * para cada una de las combinaciones de la primera figura que esta cayendo.
+ */
 typedef struct {
     int rotation;
     int column;
 } possible_plays_t;
 
+/**
+ * @brief Estructura de datos compartidos entre todos los hilos de ejecucion.
+ * @details Contiene la cantidad de hilos, la cantidad de jugadas diferentes, el arreglo de todas
+ * las combinaciones de jugadas posibles, el estado del tetris inicial, un mutex para controlar el
+ * acceso a la variable altura minima del tetris compartido y otro mutex para acceder al acceso a
+ * los niveles.
+ */
 typedef struct {
     size_t thread_count;
     int plays_count;
@@ -41,12 +53,14 @@ typedef struct {
     pthread_mutex_t can_access_levels;
 } shared_data_t;
 
+/**
+ * @brief Estructura de datos privados para cada hilo de ejecucion.
+ * @details Contiene el numero del hilo y un puntero hacia los datos compartidos.
+ */
 typedef struct {
     size_t thread_number;
     shared_data_t *shared_data;
 } private_data_t;
-
-
 
 
 /**
@@ -84,7 +98,12 @@ int solve_tetris_dfs(tetris_t* tetris, int piece_index,
  */
 void *solve_tetris(void *data);
 
-
+/**
+ * @brief Rutina para clonar una estado del tetris.
+ * @details Crea un nuevo tetris y clona los datos del estado origen.
+ * @param shared_data Puntero a la informacion compartida.
+ * @return Un puntero al nuevo tetris_t* creado.
+ */
 tetris_t* clone_tetris(shared_data_t* shared_data);
 
 #endif

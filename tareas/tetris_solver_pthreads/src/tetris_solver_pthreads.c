@@ -25,6 +25,12 @@
  */
 void generate_files(tetris_t* tetris, struct level_t* base_level);
 
+/**
+ * @brief Rutina para iniciar a solucionar el tetris.
+ * @details Almacena en un arreglo todas las posibles columnas y rotaciones en que se puede colocar una figura para separar los datos entre los hilos.
+ * @param shared_data Puntero a la informacion compartida.
+ * @return void.
+ */
 void start_solver(shared_data_t* shared_data);
 
 
@@ -66,22 +72,11 @@ int main(int argc, char** argv) {
             return 4;
         }
 
-        // Creación del nivel base
-        // shared_data->tetris->levels = create_level('B', 0,
-        //                             shared_data->tetris->rows,
-        //                             shared_data->tetris->columns,
-        //                             shared_data->tetris->matrix);
-
-        // if (!shared_data->tetris->levels) {
-        //    fprintf(stderr, "Error: could not create the base level.\n");
-        //    return 5;
-        // }
-
         // Inicio del conteo del tiempo de ejecución
         struct timespec start_time;
         clock_gettime(/*clk_id*/ CLOCK_MONOTONIC, &start_time);
 
-        // Rutina recursiva para la soluciión del tetris
+        // Inicio de rutina para la soluciión del tetris
         printf("\nResolviendo tetris...\n");
         start_solver(shared_data);
         printf("\nTerminado todo el DFS...\n");
@@ -179,17 +174,15 @@ void start_solver(shared_data_t* shared_data) {
     shared_data->plays = (possible_plays_t*)
         calloc(num_rotations*tetris->columns, sizeof(possible_plays_t));
 
-    // TODO(manum): validar error
+    if (!shared_data->plays) {
+        fprintf(stderr, "Error: could not create shared_data.\n");
+        return;
+    }
 
     // Se recorren todas las posibles rotaciones de la figura
     for (int rotation = 0; rotation < num_rotations; ++rotation) {
         // Se recorren todas las columnas del tablero
         for (int num_col = 0; num_col < tetris->columns; ++num_col) {
-            // TODO(manum): optimizar
-            // if (calculate_height(tetris) > tetris->min_height) {
-            //      continue;
-            // }
-
             int index = (rotation * tetris->columns) + num_col;
             // printf("INDEX: %d\n", index);
             shared_data->plays[index].rotation = rotation;
@@ -197,11 +190,10 @@ void start_solver(shared_data_t* shared_data) {
         }
     }
     shared_data->plays_count = num_rotations * tetris->columns;
-     printf("plays_count: %d\n", shared_data->plays_count);
 
-    pthread_t *threads = (pthread_t *)calloc(shared_data->thread_count,
-                                                sizeof(pthread_t));
-    private_data_t *private_data = (private_data_t *)
+    pthread_t* threads = (pthread_t*) calloc(shared_data->thread_count,
+                                             sizeof(pthread_t));
+    private_data_t* private_data = (private_data_t*)
         calloc(shared_data->thread_count, sizeof(private_data_t));
 
     if (threads && private_data) {
@@ -215,8 +207,8 @@ void start_solver(shared_data_t* shared_data) {
                 &private_data[index]) == EXIT_SUCCESS) {
             } else {
                 fprintf(stderr, "error: could not create thread %zu\n", index);
-                // return 6;
-                break;
+                // break;
+                return;
             }
         }
 
@@ -229,5 +221,7 @@ void start_solver(shared_data_t* shared_data) {
         pthread_mutex_destroy(&shared_data->can_access_min_height);
         pthread_mutex_destroy(&shared_data->can_access_levels);
         free(shared_data->plays);
+    } else {
+        fprintf(stderr, "Error: could not create threads or private_data.\n");
     }
 }

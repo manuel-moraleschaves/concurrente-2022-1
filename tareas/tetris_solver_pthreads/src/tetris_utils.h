@@ -46,7 +46,7 @@ void print_matrix_file(const size_t row_count, char** matrix, FILE* file);
 
 /**
  * @brief Rutina para clonar una matriz.
- * @details Crear una nueva matriz y clona los datos de la amtriz origen.
+ * @details Crear una nueva matriz y clona los datos de la matriz origen.
  * @param matrix Matriz que se desea clonar.
  * @param row_count Cantidad de filas de la matriz.
  * @param col_count Cantidad de columnas de la matriz.

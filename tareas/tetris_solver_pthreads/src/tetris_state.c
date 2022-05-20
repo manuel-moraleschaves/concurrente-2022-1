@@ -123,7 +123,6 @@ void destroy_tetris(tetris_t* tetris) {
 
 int solve_tetris_dfs(tetris_t* tetris, int piece_index,
                      struct level_t* base_level, shared_data_t* shared_data) {
-    // printf("DENTRO DE DFS... INDEX: %d\n", piece_index);
     // Si es el último nivel
     if (piece_index == tetris->depth + 1) {
         int current_height = calculate_height(tetris);
@@ -212,15 +211,11 @@ int solve_tetris_dfs(tetris_t* tetris, int piece_index,
 }
 
 void *solve_tetris(void *data) {
-    // printf("DENTRO DE solve_tetris...\n");
-    // int result = 0;
-    const private_data_t *private_data = (private_data_t *)data;
-    shared_data_t *shared_data = private_data->shared_data;
+    const private_data_t* private_data = (private_data_t*)data;
+    shared_data_t* shared_data = private_data->shared_data;
 
     for (int i = private_data->thread_number; i < shared_data->plays_count;
-                                            i+=shared_data->thread_count) {
-        // printf(" i: %d\n", i);
-
+                                              i += shared_data->thread_count) {
         // Se clona el tetris
         tetris_t* tetris = clone_tetris(shared_data);
 
@@ -254,9 +249,9 @@ void *solve_tetris(void *data) {
                     struct level_t * current = tetris->levels;
 
                     // Si tiene más niveles siguientes los elimina
-                    if (current->next) {
-                        destroy_levels(current->next, tetris->rows);
-                    }
+                    // if (current->next) {
+                    //     destroy_levels(current->next, tetris->rows);
+                    // }
 
                     // Agrega el nuevo nivel
                     current->next = level;
@@ -265,9 +260,6 @@ void *solve_tetris(void *data) {
 
                 // Llamado a rutina recursiva con la siguiente figura
                 solve_tetris_dfs(tetris, 1, tetris->levels, shared_data);
-
-                // Remueve la figura colocada
-                // remove_figure(tetris, figure, num_row, num_col);
             }
         }
         // Liberar tetris
@@ -278,36 +270,28 @@ void *solve_tetris(void *data) {
 
 tetris_t* clone_tetris(shared_data_t* shared_data) {
     tetris_t* source = shared_data->tetris;
-    // printf("  Dentro de clone_tetris...\n");
     tetris_t* tetris = malloc(sizeof(tetris_t));
 
     if (!tetris) {
         return NULL;
     }
-    // printf("  Despues de crear tetris...\n");
 
     tetris->id = source->id;
-    // printf("  id: %zu\n", tetris->id);
     tetris->depth = source->depth;
-    // printf("  depth: %d\n", tetris->depth);
     tetris->rows = source->rows;
-    // printf("  rows: %d\n", tetris->rows);
     tetris->columns = source->columns;
-    // printf("  columns: %d\n", tetris->columns);
 
     tetris->matrix = clone_matrix(source->matrix, tetris->rows,
                                   tetris->columns);
 
     if (!tetris->matrix) {
+        fprintf(stderr, "Error: could not create the matrix.\n");
         free(tetris);
         return NULL;
     }
 
-    // printf("  Despues de clone_matrix...\n");
-
     tetris->sequence_count = source->sequence_count;
 
-    // Creación de la secuencia de figuras
     tetris->figure_sequence = (char*) calloc(tetris->sequence_count + 1,
                                 sizeof(char));
 
@@ -317,16 +301,12 @@ tetris_t* clone_tetris(shared_data_t* shared_data) {
         return NULL;
     }
 
-    // printf("  Despues de crear figure_sequence...\n");
-
-    snprintf(tetris->figure_sequence, sizeof(source->figure_sequence),
+    snprintf(tetris->figure_sequence, tetris->sequence_count + 1,
                 "%s", source->figure_sequence);
-    // printf("  figure_sequence: %s\n", tetris->figure_sequence);
 
     pthread_mutex_lock(&shared_data->can_access_min_height);
     tetris->min_height = source->min_height;
     pthread_mutex_unlock(&shared_data->can_access_min_height);
-    // printf("  min_height: %d\n", tetris->min_height);
 
     tetris->levels = create_level('B', 0, tetris->rows, tetris->columns,
                                   tetris->matrix);
@@ -335,8 +315,6 @@ tetris_t* clone_tetris(shared_data_t* shared_data) {
         free(tetris);
         return NULL;
     }
-
-    // printf("  Despues de create_level...\n");
 
     return tetris;
 }
