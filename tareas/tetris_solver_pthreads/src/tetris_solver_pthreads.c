@@ -52,14 +52,14 @@ int main(int argc, char** argv) {
             return 2;
         }
 
-        if (sscanf(argv[2], "%zu", &shared_data->thread_count) != 1
+        if (sscanf(argv[2], "%d", &shared_data->thread_count) != 1
             || errno) {
             fprintf(stderr, "Error: invalid thread count\n");
             return 3;
         }
     }
     printf("File Name: %s\n", file_name);
-    printf("Thread Count: %zu\n", shared_data->thread_count);
+    printf("Thread Count: %d\n", shared_data->thread_count);
 
     FILE* file = fopen(file_name, "r");  // read only
 
@@ -171,10 +171,10 @@ void start_solver(shared_data_t* shared_data) {
     int num_rotations =
         get_tetris_figure_num_rotations(tetris->figure_sequence[0]);
 
-    shared_data->plays = (possible_plays_t*)
-        calloc(num_rotations*tetris->columns, sizeof(possible_plays_t));
+    shared_data->moves = (possible_move_t*)
+        calloc(num_rotations*tetris->columns, sizeof(possible_move_t));
 
-    if (!shared_data->plays) {
+    if (!shared_data->moves) {
         fprintf(stderr, "Error: could not create shared_data.\n");
         return;
     }
@@ -185,11 +185,11 @@ void start_solver(shared_data_t* shared_data) {
         for (int num_col = 0; num_col < tetris->columns; ++num_col) {
             int index = (rotation * tetris->columns) + num_col;
             // printf("INDEX: %d\n", index);
-            shared_data->plays[index].rotation = rotation;
-            shared_data->plays[index].column = num_col;
+            shared_data->moves[index].rotation = rotation;
+            shared_data->moves[index].column = num_col;
         }
     }
-    shared_data->plays_count = num_rotations * tetris->columns;
+    shared_data->moves_count = num_rotations * tetris->columns;
 
     pthread_t* threads = (pthread_t*) calloc(shared_data->thread_count,
                                              sizeof(pthread_t));
@@ -200,19 +200,19 @@ void start_solver(shared_data_t* shared_data) {
         pthread_mutex_init(&shared_data->can_access_min_height, NULL);
         pthread_mutex_init(&shared_data->can_access_levels, NULL);
 
-        for (size_t index = 0; index < shared_data->thread_count; ++index) {
+        for (int index = 0; index < shared_data->thread_count; ++index) {
             private_data[index].thread_number = index;
             private_data[index].shared_data = shared_data;
             if (pthread_create(&threads[index], /*attr*/ NULL, solve_tetris,
                 &private_data[index]) == EXIT_SUCCESS) {
             } else {
-                fprintf(stderr, "error: could not create thread %zu\n", index);
+                fprintf(stderr, "error: could not create thread %d\n", index);
                 // break;
                 return;
             }
         }
 
-        for (size_t index = 0; index < shared_data->thread_count; ++index) {
+        for (int index = 0; index < shared_data->thread_count; ++index) {
             pthread_join(threads[index], /*value_ptr*/ NULL);
         }
 
@@ -220,7 +220,7 @@ void start_solver(shared_data_t* shared_data) {
         free(private_data);
         pthread_mutex_destroy(&shared_data->can_access_min_height);
         pthread_mutex_destroy(&shared_data->can_access_levels);
-        free(shared_data->plays);
+        free(shared_data->moves);
     } else {
         fprintf(stderr, "Error: could not create threads or private_data.\n");
     }

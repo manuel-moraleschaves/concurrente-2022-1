@@ -35,7 +35,7 @@ typedef struct {
 typedef struct {
     int rotation;
     int column;
-} possible_plays_t;
+} possible_move_t;
 
 /**
  * @brief Estructura de datos compartidos entre todos los hilos de ejecucion.
@@ -45,9 +45,9 @@ typedef struct {
  * los niveles.
  */
 typedef struct {
-    size_t thread_count;
-    int plays_count;
-    possible_plays_t* plays;
+    int thread_count;
+    int moves_count;
+    possible_move_t* moves;
     tetris_t* tetris;
     pthread_mutex_t can_access_min_height;
     pthread_mutex_t can_access_levels;
@@ -59,7 +59,7 @@ typedef struct {
  */
 typedef struct {
     size_t thread_number;
-    shared_data_t *shared_data;
+    shared_data_t* shared_data;
 } private_data_t;
 
 

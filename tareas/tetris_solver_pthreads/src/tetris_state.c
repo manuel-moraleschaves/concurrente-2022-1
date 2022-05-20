@@ -214,19 +214,19 @@ void *solve_tetris(void *data) {
     const private_data_t* private_data = (private_data_t*)data;
     shared_data_t* shared_data = private_data->shared_data;
 
-    for (int i = private_data->thread_number; i < shared_data->plays_count;
+    for (int i = private_data->thread_number; i < shared_data->moves_count;
                                               i += shared_data->thread_count) {
         // Se clona el tetris
         tetris_t* tetris = clone_tetris(shared_data);
 
         figure_t* figure = get_tetris_figure(tetris->figure_sequence[0],
-                                             shared_data->plays[i].rotation);
+                                             shared_data->moves[i].rotation);
 
         // Se valida si la figura cabe en la columna
-        if (valid_column(tetris, figure, shared_data->plays[i].column)) {
+        if (valid_column(tetris, figure, shared_data->moves[i].column)) {
             // Intenta colocar la figura en la fila más baja
             int num_row = place_figure(tetris, figure,
-                                       shared_data->plays[i].column);
+                                       shared_data->moves[i].column);
 
             pthread_mutex_lock(&shared_data->can_access_min_height);
             int shared_min_height = shared_data->tetris->min_height;
@@ -242,7 +242,7 @@ void *solve_tetris(void *data) {
             if (num_row != -1) {
                 // Crea el registro del nivel
                 struct level_t* level = create_level(tetris->figure_sequence[0],
-                                                shared_data->plays[i].rotation,
+                                                shared_data->moves[i].rotation,
                                                 tetris->rows, tetris->columns,
                                                 tetris->matrix);
                 if (level) {
