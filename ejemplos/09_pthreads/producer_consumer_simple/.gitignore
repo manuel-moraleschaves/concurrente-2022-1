@@ -1,0 +1,5 @@
+producer_consumer_simple
+producer_consumer_simple_asan
+producer_consumer_simple_msan
+producer_consumer_simple_tsan
+producer_consumer_simple_ubsan
