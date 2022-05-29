@@ -136,6 +136,8 @@ Z
 ```
 Si para un estado dado, el programa no pudo encontrar del todo una posición valida para colocar la figura correspondiente al nivel, entonces **no** se genera ningún archivo de salida para dicho nivel ni para los siguientes.
 
+El cálculo del mejor puntaje o jugada se realiza de forma concurrente utilizando hilos de ejecución que se reparten el trabajo. Dicha repartición de trabajo se realiza mediante un mapeo cíclico.
+
 ## Manual de uso
 Para compilar el programa se puede utilizar el makefile incluido de la siguiente manera:
 
@@ -154,16 +156,29 @@ make asan
 make msan
 ```
 
-Se puede ejecutar el programa sin enviar ningún parámetro y el mismo tomará por default el archivo ./test/Test1.txt:
+- Compilar tsan
 ```
-./bin/tetris_solver_serial
-```
-
-En caso de querer utilizar otro archivo de pruebas se debe ejecutar de la siguiente manera:
-```
-./bin/tetris_solver_serial ./test/Test2.txt
+make tsan
 ```
 
+- Compilar ubsan
+```
+make ubsan
+```
+
+Para ejecutar el programa se debe enviar por parámetro la ruta del archivo de pruebas que se quiere utilizar y la cantidad de hilos que se desean crear. Se debe respetar la siguiente estructura:
+```
+./bin/tetris_solver_pthreads ruta_archivo cantidad_hilos
+```
+
+Ejemplo:
+```
+./bin/tetris_solver_pthreads ./test/Test3.txt 2
+```
+
+En caso de ejecutar el programa sin enviar el último parámetro se utilizará una cantidad de hilos igual a la cantidad de cores que posea la máquina donde se está ejecutando y en caso de no enviar ningún parámetro el programa tomará por default el archivo ./test/Test1.txt.
+\
+\
 También, se pueden utilizar los siguientes comandos adicionales:
 
 - Linter
