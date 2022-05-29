@@ -1,4 +1,4 @@
-# Tarea01: [tetris_solver_serial]
+# Tarea02: [tetris_solver_pthreads]
  
 ## Descripción del problema
 
