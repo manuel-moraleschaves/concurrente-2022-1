@@ -24,109 +24,97 @@ Lo anterior se resume en el siguiente diagrama:
 ## Descripción general
 Esta solución se basa principalmente en la ejecución recursiva de una rutina que intenta encontrar una posición válida donde pueda colocar cada una de las piezas que "van cayendo", según la profundidad dada. Esto se realiza mediante fuerza bruta y a través de un algoritmo de Búsqueda en Profundidad (Depth First Search) que permite colocar todas las piezas de la secuencia en sus diferentes rotaciones y en diferentes posiciones para calcular el puntaje de la jugada en el nivel más abajo (hoja del árbol) con el fin de poder comparar dicho puntaje con el mejor puntaje que se tenga hasta el momento y poder así determinar si una jugada es mejor que la otra. En caso de haber encontrado una mejor jugada, se almacena en memoria la información del nivel bajo la estructura de una cola al insertar el nuevo nodo como un hijo o como el nodo siguiente del nivel actual, esto permite llevar el rastreo o tracking de la pieza colocada en cada nivel. El puntaje de las jugadas está basado en el cálculo de la altura mínima que tiene el tablero del tetris después de colocar una pieza.
 
+Lo anterior es llevado a cabo de forma concurrente por varios hilos de ejecución que se reparten el trabajo según lo descrito anteriormente y esto permite encontrar más rápido la solución buscada.
+
 De forma general, estos son los pasos que ejecuta el programa principal:
-1. Abre y lee el archivo de entrada.
+1. Carga los parámetros recibidos y lee el archivo de entrada.
 2. Carga el estado inicial del tetris: el identificador, la profundidad, el número de filas, el número de columnas, la matriz inicial, la cantidad de figuras siguientes y la secuencia de figuras.
-3. Crea el nivel inicial o base, como se quiera llamar.
-4. Empieza el conteo del tiempo de ejecución.
-5. Inicia la ejecución recursiva del algoritmo principal (ver pseudocódigo) para solucionar el tetris.
-6. Genera los archivos resultantes para cada uno de los niveles almacenados en la cola después de la ejecución.
-7. Libera toda la memoria correspondiente.
-8. Calcula y muestra el tiempo tardado en la ejecución.
+3. Inicia el conteo del tiempo de ejecución.
+4. Calcula y almacena en el arreglo todas las unidades de trabajo.
+5. Crea y carga los datos privados y compartidos.
+6. Crea los hilos y los mutex.
+7. Inicia la ejecución de cada hilo que toma su unidad de trabajo correspondiente y ejecuta de forma recursiva el algoritmo principal DFS para solucionar el tetris.
+8. Espera la finalización de todos los hilos.
+9. Genera los archivos resultantes para cada uno de los niveles almacenados en la cola después de la ejecución.
+10. Libera toda la memoria correspondiente.
+11. Calcula y muestra el tiempo tardado en la ejecución.
 
 
 ## Pseudocódigo
-A continuación se muestra el pseudocódigo de los algoritmos principales utilizados para resolver el problema:
+A continuación se muestra el pseudocódigo relacionado a la lógica concurrente:
 ```
-Algoritmo Solve_Tetris (data)
-Variables
-    entero num_rotacion, num_fila
-    figura_t figura
-    nivel_t nuevo_nivel, nivel_actual
-    datos_privados_t datos_privados
-    datos_compartidos_t datos_compartidos
+main(argc, argv[]):
+    file_name := "./test/Test1.txt"
+    shared thread_count = SC_NPROCESSORS_ONLN
 
-Inicio
-    datos_privados <- data
-    datos_compartidos <- datos_privados.datos_compartidos
+    if argc = 2 then
+        file_name := integer(argv[1])      
+    end if
+
+    if argc = 3 then
+        file_name := string(argv[1])     
+        thread_count := integer(argv[2])    
+    end if
+
+    file := open(file_name, "r")
+    shared tetris := read_tetris(file)
     
-    Para i <- datos_privados.num_hilo Hasta datos_compartidos.cant_jugadas Aumentar i + datos_compartidos.cant_hilos Hacer
-        tetris = Clonar_Tetris(datos_compartidos.tetris)
+    start_time := clock_gettime()
+    start_solver()
+    generate_files(tetris)
+    finish_time := clock_gettime()
 
-        figura <- Obtener_Figura(tetris.secuencia_piezas[0], datos_compartidos.posibles_jugadas.num_rotacion)
+    print("Tiempo de ejecución:  ", start_time - finish_time)
 
-        Si Columna_Valida(tetris, figura, datos_compartidos.posibles_jugadas.num_columna) Entonces
-            num_fila <- Colocar_Figura(tetris, figura, datos_compartidos.posibles_jugadas.num_columna)
+generate_files:
+    current := tetris.levels
+    while (current != NULL) {
+        out_file = open("tetris_play_%i.txt", "w")
+        print(out_file, tetris.id)
+        print(out_file, current.figure)
+        print(out_file, current.rotation)
+        print(out_file, tetris.rows)
+        print(out_file, tetris.columns)
+        print_matrix_file(tetris.rows, current.matrix, out_file);
+    end while
 
-            Si num_fila <> -1 Entonces
-                nuevo_nivel = Crear_Nivel(tetris.secuencia_piezas[indice_pieza], datos_compartidos.posibles_jugadas.num_rotacion,
-                                            tetris.filas, tetris.columnas, tetris.matriz)
-                
-                nivel_actual <- nivel_base
+start_solver:
+    num_rotations := get_tetris_figure_num_rotations(tetris.figure_sequence[0])
+    for rotation := 0 to num_rotations do
+        for num_col := 0 to tetris.columns do
+            index := (rotation * tetris.columns) + num_col
+            shared moves[index].rotation = rotation
+            shared moves[index].column = num_col
+        end for
+    end for
 
-                nivel_actual.siguiente <- nuevo_nivel
+    shared moves_count := num_rotations * tetris.columns
+    shared can_access_min_height := mutex()
+    shared can_access_levels := mutex()
 
-                Solve_Tetris_DFS(tetris, 1, nivel_base, datos_compartidos)
-            Fin Si
-        Fin Si
-        Destruir_Tetris(tetris)
-    Fin Para
+    for index := 0 to thread_count do
+        create_thread(index, solve_tetris)
+    end for
 
-Fin Algoritmo
-```
 
-```
-Algoritmo Solve_Tetris_DFS (tetris, indice_pieza, nivel_base, datos_compartidos)
-Variables
-    entero cant_rotaciones, num_rotacion, num_columna, num_fila, altura_actual
-    figura_t figura
-    nivel_t nuevo_nivel, nivel_actual
+solve_tetris:
+    for i := thread_number to moves_count, i += thread_count do
+        figure := get_tetris_figure(tetris.figure_sequence[0], moves[i].rotation)
+        place_figure(tetris, figure, moves[i].column)
 
-Inicio
-    Si indice_pieza = tetris.profundidad + 1 Entonces
-        altura_actual -> Obtener_Altura(tetris)
-        
-        mutex_altura.bloquear
-        Si altura_actual < datos_compartidos.tetris.altura_minima Entonces
-            tetris.altura_minima <- altura_actual
-            mutex_niveles.bloquear
-            Clonar_Nivel(nivel_base, datos_compartidos.tetris.niveles, tetris.filas, tetris.columnas)
-            mutex_niveles.desbloquear
-        Fin Si
-        mutex_altura.desbloquear
-    Fin Si
+        level = create_level(tetris)
+        tetris.levels.next := level
 
-    cant_rotaciones <- Obtener_Num_Rotaciones(tetris.secuencia_piezas[indice_pieza])
+        solve_tetris_dfs(tetris, 1, tetris->levels);
 
-    Para num_rotacion <- 0 Hasta cant_rotaciones Hacer
-        figura <- Obtener_Figura(tetris.secuencia_piezas[indice_pieza], num_rotacion)
-
-        Para num_columna <- 0 Hasta tetris.columnas Hacer
-            Si Columna_Valida(tetris, figura, num_columna) Entonces
-                num_fila <- Colocar_Figura(tetris, figura, num_columna)
-
-                Si num_fila <> -1 Entonces
-                    nuevo_nivel = Crear_Nivel(tetris.secuencia_piezas[indice_pieza], num_rotacion,
-                                              tetris.filas, tetris.columnas, tetris.matriz)
-                    
-                    nivel_actual <- nivel_base
-                    Para i <- 0 Hasta indice_pieza Hacer
-                        nivel_actual <- nivel_actual.siguiente
-                    Fin Para
-
-                    Si nivel_actual.siguiente Entonces
-                        Destruir_Niveles(nivel_actual.siguiente, tetris.filas)
-                    Fin Si
-
-                    nivel_actual.siguiente <- nuevo_nivel
-
-                    Solve_Tetris_DFS(tetris, indice_pieza + 1, nivel_base, datos_compartidos)
-
-                    Quitar_Figura (tetris, figura, num_fila, num_columna)
-                Fin Si
-            Fin Si   
-        Fin Para
-    Fin Para
-
-Fin Algoritmo
+        current_height := calculate_height()
+        mutex_lock(can_access_min_height)
+        if current_height < tetris.min_height then
+            tetris.min_height := current_height
+            mutex_lock(can_access_levels)
+            tetris.levels := clone_level(tetris)
+            mutex_unlock(can_access_levels)
+        end if
+        mutex_unlock(can_access_min_height)
+    end for
 ```
