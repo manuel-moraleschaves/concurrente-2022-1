@@ -36,40 +36,49 @@ void start_solver(shared_data_t* shared_data);
 
 int main(int argc, char** argv) {
     char file_name[100] = "./test/Test1.txt";
+    int thread_count = sysconf(_SC_NPROCESSORS_ONLN);
 
-    shared_data_t *shared_data = (shared_data_t *)
-        calloc(1, sizeof(shared_data_t));
-
-    if (!shared_data) {
-        fprintf(stderr, "Error: could not create shared_data.\n");
-        return 1;
-    }
-
-    shared_data->thread_count = sysconf(_SC_NPROCESSORS_ONLN);
-    if (argc == 3) {
+    if (argc == 2) {
+        if (sscanf(argv[1], "%s", file_name) != 1 || errno) {
+            fprintf(stderr, "Error: invalid file name.\n");
+            return 1;
+        }
+    } else if (argc == 3) {
         if (sscanf(argv[1], "%s", file_name) != 1 || errno) {
             fprintf(stderr, "Error: invalid file name.\n");
             return 2;
         }
 
-        if (sscanf(argv[2], "%d", &shared_data->thread_count) != 1
+        if (sscanf(argv[2], "%d", &thread_count) != 1
             || errno) {
             fprintf(stderr, "Error: invalid thread count\n");
             return 3;
         }
+    } else if (argc > 3) {
+        printf("Bad parameters. Required format: ");
+        printf("tetris_solver_pthreads file_name thread_count\n");
+        return 4;
     }
+
     printf("File Name: %s\n", file_name);
-    printf("Thread Count: %d\n", shared_data->thread_count);
+    printf("Thread Count: %d\n", thread_count);
 
     FILE* file = fopen(file_name, "r");  // read only
 
     if (file) {
+        shared_data_t *shared_data = (shared_data_t *)
+                                    calloc(1, sizeof(shared_data_t));
+        if (!shared_data) {
+            fprintf(stderr, "Error: could not create shared_data.\n");
+            return 5;
+        }
+        shared_data->thread_count = thread_count;
         // Lectura del estado inicial desde el archivo de entrada
         shared_data->tetris = read_tetris(file);
 
         if (!shared_data->tetris) {
             fprintf(stderr, "Error: invalid file content.\n");
-            return 4;
+            return 6;
         }
 
         // Inicio del conteo del tiempo de ejecución
@@ -101,7 +110,7 @@ int main(int argc, char** argv) {
 
     } else {
         fprintf(stderr, "Error: could not open the file %s.\n", file_name);
-        return 6;
+        return 7;
     }
 
     return EXIT_SUCCESS;
@@ -184,7 +193,6 @@ void start_solver(shared_data_t* shared_data) {
         // Se recorren todas las columnas del tablero
         for (int num_col = 0; num_col < tetris->columns; ++num_col) {
             int index = (rotation * tetris->columns) + num_col;
-            // printf("INDEX: %d\n", index);
             shared_data->moves[index].rotation = rotation;
             shared_data->moves[index].column = num_col;
         }
@@ -207,7 +215,6 @@ void start_solver(shared_data_t* shared_data) {
                 &private_data[index]) == EXIT_SUCCESS) {
             } else {
                 fprintf(stderr, "error: could not create thread %d\n", index);
-                // break;
                 return;
             }
         }
