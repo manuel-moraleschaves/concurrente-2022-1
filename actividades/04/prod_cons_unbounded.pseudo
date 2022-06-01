@@ -1,0 +1,68 @@
+main(argc, argv[]):
+  if argc = 7 then
+    shared unit_to_produce := integer(argv[0])
+
+    shared producer_count := integer(argv[1])
+    shared consumer_count := integer(argv[2])
+
+    shared producer_min_delay := integer(argv[3])
+    shared producer_max_delay := integer(argv[4])
+    shared consumer_min_delay := integer(argv[5])
+    shared consumer_max_delay := integer(argv[6])
+
+    shared can_consume := semaphore(0)
+
+    shared can_access_queue := semaphore(1)
+    shared queue := create_integer_queue()
+
+    shared can_access_produced_counter := semaphore(1)
+    shared produced_counter := 0
+
+    shared can_access_consumed_counter := semaphore(1)
+    shared consumed_counter := 0
+
+    create_thread(producer_count, producer)
+    create_thread(consumer_count, consumer)
+  end if
+
+producer:
+    while (true)
+        wait(can_access_produced_counter)
+        if produced_counter >= unit_to_produce
+            signal(can_access_produced_counter)
+            break while
+        end if
+
+        produced_counter++
+        product = produced_counter
+        signal(can_access_produced_counter)
+
+        wait(can_access_queue)
+            enqueue(queue, product)
+            print("Produced", product)
+        signal(can_access_queue)
+        signal(can_consume)
+    end while
+
+consumer:
+
+    while (true)
+        
+        wait(can_access_consumed_counter)
+            if consumed_counter >= unit_to_produce
+                signal(can_access_consumed_counter)
+                break while
+            end if        
+            consumed_counter++
+        signal(can_access_consumed_counter)
+
+        wait(can_consume)
+
+        wait(can_access_queue)
+            value = dequeue(queue)
+            print("Consumer: ", value)
+        signal(can_access_queue)
+    end while
+
+random_between(min, max):
+  return min + rand() % (max - min)
