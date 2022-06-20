@@ -28,26 +28,13 @@ typedef struct {
 } tetris_t;
 
 /**
- * @brief Estructura para almacenar todas las posibles jugadas de la primera letra.
- * @details Contiene el numero de rotacion de la figura y el numero de la columna
- * para cada una de las combinaciones de la primera figura que esta cayendo.
- */
-typedef struct {
-    int rotation;
-    int column;
-} possible_move_t;
-
-/**
  * @brief Estructura de datos compartidos entre todos los hilos de ejecucion.
- * @details Contiene la cantidad de hilos, la cantidad de jugadas diferentes, el arreglo de todas
- * las combinaciones de jugadas posibles, el estado del tetris inicial, un mutex para controlar el
+ * @details Contiene la cantidad de hilos, el estado del tetris inicial, un mutex para controlar el
  * acceso a la variable altura minima del tetris compartido y otro mutex para acceder al acceso a
  * los niveles.
  */
 typedef struct {
     int thread_count;
-    int moves_count;
-    possible_move_t* moves;
     tetris_t* tetris;
     pthread_mutex_t can_access_min_height;
     pthread_mutex_t can_access_levels;

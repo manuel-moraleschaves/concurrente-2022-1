@@ -214,56 +214,56 @@ void *solve_tetris(void *data) {
     const private_data_t* private_data = (private_data_t*)data;
     shared_data_t* shared_data = private_data->shared_data;
 
-    for (int i = private_data->thread_number; i < shared_data->moves_count;
-                                              i += shared_data->thread_count) {
-        // Se clona el tetris
-        tetris_t* tetris = clone_tetris(shared_data);
+    int num_rotations =
+       get_tetris_figure_num_rotations(shared_data->tetris->figure_sequence[0]);
 
-        figure_t* figure = get_tetris_figure(tetris->figure_sequence[0],
-                                             shared_data->moves[i].rotation);
+    // Se recorren las unidades de trabajo (columnas) segun un mapeo ciclico
+    for (int col = private_data->thread_number;
+                        col < num_rotations * shared_data->tetris->columns;
+                        col += shared_data->thread_count) {
+        for (int rotation = 0; rotation < num_rotations; ++rotation) {
+            // Se clona el tetris
+            tetris_t* tetris = clone_tetris(shared_data);
 
-        // Se valida si la figura cabe en la columna
-        if (valid_column(tetris, figure, shared_data->moves[i].column)) {
-            // Intenta colocar la figura en la fila más baja
-            int num_row = place_figure(tetris, figure,
-                                       shared_data->moves[i].column);
+            figure_t* figure = get_tetris_figure(tetris->figure_sequence[0],
+                                                 rotation);
 
-            pthread_mutex_lock(&shared_data->can_access_min_height);
-            int shared_min_height = shared_data->tetris->min_height;
-            pthread_mutex_unlock(&shared_data->can_access_min_height);
+            // Se valida si la figura cabe en la columna
+            if (valid_column(tetris, figure, col)) {
+                // Intenta colocar la figura en la fila más baja
+                int num_row = place_figure(tetris, figure, col);
 
-            // TODO(manum): optimizar
-            if (calculate_height(tetris) > shared_min_height) {
-                destroy_tetris(tetris);
-                continue;
-            }
+                pthread_mutex_lock(&shared_data->can_access_min_height);
+                int shared_min_height = shared_data->tetris->min_height;
+                pthread_mutex_unlock(&shared_data->can_access_min_height);
 
-            // Si logró colocar la figura
-            if (num_row != -1) {
-                // Crea el registro del nivel
-                struct level_t* level = create_level(tetris->figure_sequence[0],
-                                                shared_data->moves[i].rotation,
-                                                tetris->rows, tetris->columns,
-                                                tetris->matrix);
-                if (level) {
-                    struct level_t * current = tetris->levels;
-
-                    // Si tiene más niveles siguientes los elimina
-                    // if (current->next) {
-                    //     destroy_levels(current->next, tetris->rows);
-                    // }
-
-                    // Agrega el nuevo nivel
-                    current->next = level;
-                    current->next->next = NULL;
+                if (calculate_height(tetris) > shared_min_height) {
+                    destroy_tetris(tetris);
+                    continue;
                 }
 
-                // Llamado a rutina recursiva con la siguiente figura
-                solve_tetris_dfs(tetris, 1, tetris->levels, shared_data);
+                // Si logró colocar la figura
+                if (num_row != -1) {
+                    // Crea el registro del nivel
+                    struct level_t* level =
+                                        create_level(tetris->figure_sequence[0],
+                                        rotation, tetris->rows, tetris->columns,
+                                        tetris->matrix);
+                    if (level) {
+                        struct level_t * current = tetris->levels;
+
+                        // Agrega el nuevo nivel
+                        current->next = level;
+                        current->next->next = NULL;
+                    }
+
+                    // Llamado a rutina recursiva con la siguiente figura
+                    solve_tetris_dfs(tetris, 1, tetris->levels, shared_data);
+                }
             }
+            // Liberar tetris
+            destroy_tetris(tetris);
         }
-        // Liberar tetris
-        destroy_tetris(tetris);
     }
     return NULL;
 }

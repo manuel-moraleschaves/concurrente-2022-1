@@ -7,14 +7,13 @@ El siguiente diagrama UML muestra el diseño de la estructura de datos realizada
 
 Como se puede apreciar, existen 3 estructuras de datos básicas que representan las figuras, el estado del tetris y una cola para manejar los niveles. La estructura de figuras no se relaciona directamente con el estado del tetris ni con los niveles, pero el estado del tetris sí tiene relación directa con la estructura de niveles mediante un puntero al nivel inicial o base cargado desde el archivo de entrada. Además, la estructura de niveles tiene una relación a sí misma ya que al funcionar como una cola cada nodo (nivel) se relaciona con el nodo que le sigue (siguiente nivel).
 
-Por otro lado, existen otras 3 estructuras de datos que son utilizadas para el manejo de la concurrencia:
+Por otro lado, existen otras 2 estructuras de datos que son utilizadas para el manejo de la concurrencia:
 *   Datos privados de cada hilo. Tiene una relación directa hacia la estructura de datos compartidos.
-*   Datos compartidos entre todos los hilos. Tiene una relación directa hacia la estructura del estado global del tetris y también hacia la estructura de posibles jugadas o movimientos.
-*   Posibles movimientos. Representa las distintas combinaciones en cuanto a la rotación y la columna de la figura del primer nivel, en otras palabras, representa las posibles jugadas de la primer figura que serán repartidas entre los hilos de ejecución. 
+*   Datos compartidos entre todos los hilos. Tiene una relación directa hacia la estructura del estado global del tetris.
 
 
 ## Diagrama de repartición de trabajo entre hilos
-La repartición del trabajo entre los hilos de ejecución se realiza mediante un mapeo cíclico, donde cada hilo efectuará el cálculo recursivo para un movimiento o jugada específica de la primera figura. Cada unidad de trabajo corresponde a una combinación específica de la rotación y la columna de la figura del primer nivel; y de forma cíclica, cada hilo tomará la siguiente unidad de trabajo en el arreglo de todas las posibles jugadas para la primera figura calculadas en el main.
+La repartición del trabajo entre los hilos de ejecución se realiza mediante un mapeo cíclico, donde cada hilo efectuará el cálculo recursivo para una columna específica y para cada rotación de la primera figura. Cada unidad de trabajo corresponde a una columna del tablero y se recorrerá cada posible rotación para calcular el mejor score. De forma cíclica, cada hilo tomará la siguiente columna según el tamaño del tablero.
 
 Lo anterior se resume en el siguiente diagrama:
 
@@ -78,17 +77,7 @@ generate_files:
         print_matrix_file(tetris.rows, current.matrix, out_file);
     end while
 
-start_solver:
-    num_rotations := get_tetris_figure_num_rotations(tetris.figure_sequence[0])
-    for rotation := 0 to num_rotations do
-        for num_col := 0 to tetris.columns do
-            index := (rotation * tetris.columns) + num_col
-            shared moves[index].rotation = rotation
-            shared moves[index].column = num_col
-        end for
-    end for
-
-    shared moves_count := num_rotations * tetris.columns
+start_solver:    
     shared can_access_min_height := mutex()
     shared can_access_levels := mutex()
 
@@ -96,25 +85,28 @@ start_solver:
         create_thread(index, solve_tetris)
     end for
 
-
 solve_tetris:
-    for i := thread_number to moves_count, i += thread_count do
-        figure := get_tetris_figure(tetris.figure_sequence[0], moves[i].rotation)
-        place_figure(tetris, figure, moves[i].column)
+    num_rotations := get_tetris_figure_num_rotations(tetris.figure_sequence[0])
 
-        level = create_level(tetris)
-        tetris.levels.next := level
+    for col := thread_number to num_rotations*tetris->columns, col += thread_count do
+        for rotation := 0 to num_rotations do
+            figure := get_tetris_figure(tetris.figure_sequence[0], rotation)
+            place_figure(tetris, figure, col)
 
-        solve_tetris_dfs(tetris, 1, tetris->levels);
+            level = create_level(tetris)
+            tetris.levels.next := level
 
-        current_height := calculate_height()
-        mutex_lock(can_access_min_height)
-        if current_height < tetris.min_height then
-            tetris.min_height := current_height
-            mutex_lock(can_access_levels)
-            tetris.levels := clone_level(tetris)
-            mutex_unlock(can_access_levels)
-        end if
-        mutex_unlock(can_access_min_height)
+            solve_tetris_dfs(tetris, 1, tetris->levels);
+
+            current_height := calculate_height()
+            mutex_lock(can_access_min_height)
+            if current_height < tetris.min_height then
+                tetris.min_height := current_height
+                mutex_lock(can_access_levels)
+                tetris.levels := clone_level(tetris)
+                mutex_unlock(can_access_levels)
+            end if
+            mutex_unlock(can_access_min_height)
+        end for
     end for
 ```

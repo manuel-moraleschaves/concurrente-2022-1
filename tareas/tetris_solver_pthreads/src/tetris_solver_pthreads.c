@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <pthread.h>  // Para el cálculo del tiempo de ejecución
+#include <pthread.h>
 
 #include "tetris_state.h"
 #include "tetris_utils.h"
@@ -27,7 +27,8 @@ void generate_files(tetris_t* tetris, struct level_t* base_level);
 
 /**
  * @brief Rutina para iniciar a solucionar el tetris.
- * @details Almacena en un arreglo todas las posibles columnas y rotaciones en que se puede colocar una figura para separar los datos entre los hilos.
+ * @details Almacena en un arreglo todas las posibles columnas y rotaciones en que se puede colocar una
+ * figura para separar los datos entre los hilos.
  * @param shared_data Puntero a la informacion compartida.
  * @return void.
  */
@@ -175,30 +176,6 @@ void generate_files(tetris_t* tetris, struct level_t* base_level) {
 }
 
 void start_solver(shared_data_t* shared_data) {
-    tetris_t* tetris = shared_data->tetris;
-
-    int num_rotations =
-        get_tetris_figure_num_rotations(tetris->figure_sequence[0]);
-
-    shared_data->moves = (possible_move_t*)
-        calloc(num_rotations*tetris->columns, sizeof(possible_move_t));
-
-    if (!shared_data->moves) {
-        fprintf(stderr, "Error: could not create shared_data.\n");
-        return;
-    }
-
-    // Se recorren todas las posibles rotaciones de la figura
-    for (int rotation = 0; rotation < num_rotations; ++rotation) {
-        // Se recorren todas las columnas del tablero
-        for (int num_col = 0; num_col < tetris->columns; ++num_col) {
-            int index = (rotation * tetris->columns) + num_col;
-            shared_data->moves[index].rotation = rotation;
-            shared_data->moves[index].column = num_col;
-        }
-    }
-    shared_data->moves_count = num_rotations * tetris->columns;
-
     pthread_t* threads = (pthread_t*) calloc(shared_data->thread_count,
                                              sizeof(pthread_t));
     private_data_t* private_data = (private_data_t*)
@@ -227,7 +204,6 @@ void start_solver(shared_data_t* shared_data) {
         free(private_data);
         pthread_mutex_destroy(&shared_data->can_access_min_height);
         pthread_mutex_destroy(&shared_data->can_access_levels);
-        free(shared_data->moves);
     } else {
         fprintf(stderr, "Error: could not create threads or private_data.\n");
     }
