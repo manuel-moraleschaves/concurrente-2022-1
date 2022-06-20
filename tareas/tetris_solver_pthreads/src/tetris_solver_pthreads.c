@@ -37,7 +37,8 @@ void start_solver(shared_data_t* shared_data);
 
 int main(int argc, char** argv) {
     char file_name[100] = "./test/Test1.txt";
-    int thread_count = sysconf(_SC_NPROCESSORS_ONLN);
+    int const processor_count = sysconf(_SC_NPROCESSORS_ONLN);
+    int thread_count = processor_count;
 
     if (argc == 2) {
         if (sscanf(argv[1], "%s", file_name) != 1 || errno) {
@@ -54,6 +55,12 @@ int main(int argc, char** argv) {
             || errno) {
             fprintf(stderr, "Error: invalid thread count\n");
             return 3;
+        }
+
+        if (thread_count > processor_count*2) {
+            fprintf(stderr, "Number of threads allowed on this PC: 1-%i\n",
+                processor_count*2);
+            thread_count = processor_count;
         }
     } else if (argc > 3) {
         printf("Bad parameters. Required format: ");
