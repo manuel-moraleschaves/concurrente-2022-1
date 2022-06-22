@@ -56,12 +56,6 @@ int main(int argc, char** argv) {
             fprintf(stderr, "Error: invalid thread count\n");
             return 3;
         }
-
-        if (thread_count > processor_count*2) {
-            fprintf(stderr, "Number of threads allowed on this PC: 1-%i\n",
-                processor_count*2);
-            thread_count = processor_count;
-        }
     } else if (argc > 3) {
         printf("Bad parameters. Required format: ");
         printf("tetris_solver_pthreads file_name thread_count\n");
@@ -69,8 +63,6 @@ int main(int argc, char** argv) {
     }
 
     printf("File Name: %s\n", file_name);
-    printf("Thread Count: %d\n", thread_count);
-
     FILE* file = fopen(file_name, "r");  // read only
 
     if (file) {
@@ -80,7 +72,7 @@ int main(int argc, char** argv) {
             fprintf(stderr, "Error: could not create shared_data.\n");
             return 5;
         }
-        shared_data->thread_count = thread_count;
+
         // Lectura del estado inicial desde el archivo de entrada
         shared_data->tetris = read_tetris(file);
 
@@ -88,6 +80,17 @@ int main(int argc, char** argv) {
             fprintf(stderr, "Error: invalid file content.\n");
             return 6;
         }
+
+        fprintf(stderr, "\nNumber of threads suggested: %i", processor_count*2);
+        int moves_count = get_tetris_figure_num_rotations(shared_data->tetris->
+                           figure_sequence[0]) * shared_data->tetris->columns;        
+        if (thread_count > moves_count) {
+            fprintf(stderr, "\nNumber of threads allowed: 1-%i", moves_count);
+            thread_count = processor_count;
+        }
+
+        shared_data->thread_count = thread_count;
+        printf("\nNumber of threads to be created: %d\n", thread_count);
 
         // Inicio del conteo del tiempo de ejecución
         struct timespec start_time;
