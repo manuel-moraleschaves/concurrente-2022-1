@@ -11,22 +11,13 @@
 #include <pthread.h>
 
 #include "tetris_state.h"
-#include "tetris_utils.h"
-#include "tetris_level.h"
 #include "tetris_figure_factory.h"
+#include "tetris_file_ops.h"
+#include "tetris_solve.h"
 
 
 /**
- * @brief Rutina para generar los archivos finales.
- * @details Genera los archivos finales correspondientes a cada nivel en el que se pudo colocar una pieza
- * @param tetris Puntero al estado del tetris.
- * @param base_level Puntero al nodo base de los niveles.
- * @return void.
- */
-void generate_files(tetris_t* tetris, struct level_t* base_level);
-
-/**
- * @brief Rutina para iniciar a solucionar el tetris.
+ * @brief Rutina para empezar a solucionar el tetris.
  * @details Almacena en un arreglo todas las posibles columnas y rotaciones en que se puede colocar una
  * figura para separar los datos entre los hilos.
  * @param shared_data Puntero a la informacion compartida.
@@ -83,7 +74,7 @@ int main(int argc, char** argv) {
 
         fprintf(stderr, "\nNumber of threads suggested: %i", processor_count*2);
         int moves_count = get_tetris_figure_num_rotations(shared_data->tetris->
-                           figure_sequence[0]) * shared_data->tetris->columns;        
+                           figure_sequence[0]) * shared_data->tetris->columns;
         if (thread_count > moves_count) {
             fprintf(stderr, "\nNumber of threads allowed: 1-%i", moves_count);
             thread_count = processor_count;
@@ -99,7 +90,7 @@ int main(int argc, char** argv) {
         // Inicio de rutina para la soluciión del tetris
         printf("\nResolviendo tetris...\n");
         start_solver(shared_data);
-        printf("\nTerminado todo el DFS...\n");
+        printf("Proceso finalizado...\n");
 
         // Generación de archivos finales
         generate_files(shared_data->tetris, shared_data->tetris->levels);
@@ -125,64 +116,6 @@ int main(int argc, char** argv) {
     }
 
     return EXIT_SUCCESS;
-}
-
-void generate_files(tetris_t* tetris, struct level_t* base_level) {
-    int i = 0;
-    struct level_t* current = tetris->levels;
-    char output_name[50];
-
-    while (current != NULL) {
-        printf("\nLETRA %c\n", current->figure);
-        print_matrix(tetris->rows, current->matrix);
-
-        if (i > 0) {
-            snprintf(output_name, sizeof(output_name),
-                "tetris_play_%i.txt", i-1);
-            FILE* out_file = fopen(output_name, "w");
-            fprintf(out_file, "%zu\n", tetris->id);
-            fprintf(out_file, "%c\n", current->figure);
-            fprintf(out_file, "%i\n", current->rotation);
-            fprintf(out_file, "%i\n", tetris->rows);
-            fprintf(out_file, "%i\n", tetris->columns);
-            print_matrix_file(tetris->rows, current->matrix, out_file);
-            fclose(out_file);
-        }
-
-        current = current->next;
-        i++;
-    }
-
-    /* En caso de que del todo no se haya podido colocar una pieza, provoca
-    *  que no se almacenaran los niveles de mejor puntaje en el estado de tetris
-    *  por lo que se recorre este nodo auxiliar */       
-    if (i < tetris->depth) {
-        current = base_level;
-
-        // Llegar al nodo correspondiente
-        for (int j = 0; j < i; ++j) {
-            current = current->next;
-        }
-
-        while (current != NULL) {
-            printf("\nLETRA %c\n", current->figure);
-            print_matrix(tetris->rows, current->matrix);
-
-            snprintf(output_name, sizeof(output_name),
-                "tetris_play_%i.txt", i-1);
-            FILE* out_file = fopen(output_name, "w");
-            fprintf(out_file, "%zu\n", tetris->id);
-            fprintf(out_file, "%c\n", current->figure);
-            fprintf(out_file, "%i\n", current->rotation);
-            fprintf(out_file, "%i\n", tetris->rows);
-            fprintf(out_file, "%i\n", tetris->columns);
-            print_matrix_file(tetris->rows, current->matrix, out_file);
-            fclose(out_file);
-
-            current = current->next;
-            i++;
-        }
-    }
 }
 
 void start_solver(shared_data_t* shared_data) {
