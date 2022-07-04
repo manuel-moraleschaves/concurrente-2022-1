@@ -101,7 +101,7 @@ void *solve_tetris(void *data) {
 
     // Se recorren las unidades de trabajo (columnas) segun un mapeo ciclico
     for (int col = private_data->thread_number;
-                        col < num_rotations * shared_data->tetris->columns;
+                        col < shared_data->tetris->columns;
                         col += shared_data->thread_count) {
         for (int rotation = 0; rotation < num_rotations; ++rotation) {
             // Se clona el tetris
