@@ -238,9 +238,7 @@ También se utilizó valgrind y los sanitizers para comprobar el buen uso de la 
 
 ## Documento de reporte
 
-Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecución o en el rendimiento de la versión concurrente desarrollada en esta Tarea03 mediante el uso de la biblioteca **OpenMP** versus la versión serial desarrollada en la Tare01, así como con el objetivo de comparar esta tecnología versus la utilizada en la Tarea02 (Pthreads), se procedió a realizar algunas mediciones del tiempo transcurrido durante la ejecución de la parte más pesada del programa que es el cálculo de las mejores jugadas a través del algoritmo de DFS. Para esto se utilizó en la Tarea01 y Tarea02 la subrutina `clock_gettime` de Pthread, mientras que en la Tarea03 se utilizó la función `omp_get_wtime` de la biblioteca **OpenMP**.
-
-Se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados se resumen a continuación:
+Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecución o en el rendimiento de la versión concurrente desarrollada en esta Tarea03 mediante el uso de la biblioteca **OpenMP** versus la versión serial desarrollada en la Tare01, así como con el objetivo de comparar esta tecnología versus la utilizada en la Tarea02 (Pthreads), se procedió a realizar algunas mediciones del tiempo transcurrido del programa. Con esos datos, se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados se resumen a continuación:
 
 **Tarea01**
 * *SpeedUp*: 1.000 (medición base)
@@ -256,7 +254,7 @@ Se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados 
 
 De lo anterior se puede concluir que tanto en la Tarea02 como en la Tarea03, se logró disminuir el tiempo de ejecución al implementar sobre la Tarea01 algún tipo de concurrencia y por ende se logró optimizar el rendimiento del programa.
 
-Por otra parte, se realizó otra comparación utilizando diferentes grados de concurrencia en la versión de la Tarea03 y se encontró que en una Máquina Virtual con Debian, 4 cores y 8 GB de Ram, el mejor rendimiento se obtiene con 8 hilos, es decir con el doble de los cores disponibles en el sistema.
+Por otra parte, se realizó otra comparación utilizando diferentes grados de concurrencia en la versión de la Tarea03 y se encontró que el mejor rendimiento se obtiene con 8 hilos, es decir con el doble de los cores disponibles en el sistema.
 
 El detalle completo del Documento de reporte se puede encontrar en el siguiente [link](../tetris_solver_omp/report/README.md).
 
