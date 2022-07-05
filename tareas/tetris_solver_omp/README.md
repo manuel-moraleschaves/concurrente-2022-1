@@ -241,16 +241,16 @@ También se utilizó valgrind y los sanitizers para comprobar el buen uso de la 
 Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecución o en el rendimiento de la versión concurrente desarrollada en esta Tarea03 mediante el uso de la biblioteca **OpenMP** versus la versión serial desarrollada en la Tare01, así como con el objetivo de comparar esta tecnología versus la utilizada en la Tarea02 (Pthreads), se procedió a realizar algunas mediciones del tiempo transcurrido del programa. Con esos datos, se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados se resumen a continuación:
 
 **Tarea01**
-* *SpeedUp*: 1.000 (medición base)
-* *Eficiencia*: 1.000 (medición base)
+* SpeedUp: *1.000 (medición base)*
+* Eficiencia: *1.000 (medición base)*
 
 **Tarea02**
-* *SpeedUp*: 1.378
-* *Eficiencia*: 0.344
+* SpeedUp: *1.378*
+* Eficiencia: *0.344*
 
 **Tarea03**
-* *SpeedUp*: 2.175
-* *Eficiencia*: 0.544
+* SpeedUp: *2.175*
+* Eficiencia: *0.544*
 
 De lo anterior se puede concluir que tanto en la Tarea02 como en la Tarea03, se logró disminuir el tiempo de ejecución al implementar sobre la Tarea01 algún tipo de concurrencia y por ende se logró optimizar el rendimiento del programa.
 
