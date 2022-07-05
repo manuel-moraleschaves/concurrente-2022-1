@@ -144,7 +144,9 @@ El cálculo del mejor puntaje o jugada se realiza de forma concurrente utilizand
 El diseño de esta solución está basado en el diseño de la Tarea02 y mantiene la gran parte del mismo. La principal diferencia radica en la sustitución del uso de la tecnología Pthreads por la tecnología **OpenMP**. A su vez, la Tarea02 está basada en la solución serial diseñada en la Tarea01.
 
 Para ver los detalles del diseño de la Tarea03, ingrese al siguiente [link](/design/README.md).
+
 Para ver los detalles del diseño de la Tarea02, ingrese al siguiente [link](../tetris_solver_pthreads/design/README.md).
+
 Para ver los detalles del diseño de la Tarea01, ingrese al siguiente [link](../tetris_solver_serial/design/README.md).
 
 
