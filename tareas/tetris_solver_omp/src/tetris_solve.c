@@ -123,17 +123,6 @@ void solve_tetris(tetris_t* base_tetris, int thread_count) {
                 // Intenta colocar la figura en la fila más baja
                 int num_row = place_figure(tetris, figure, col);
 
-                int shared_min_height = 0;
-                #pragma omp critical(height)
-                {
-                    shared_min_height = base_tetris->min_height;
-                }
-
-                if (calculate_height(tetris) > shared_min_height) {
-                    destroy_tetris(tetris);
-                    continue;
-                }
-
                 // Si logró colocar la figura
                 if (num_row != -1) {
                     // Crea el registro del nivel
