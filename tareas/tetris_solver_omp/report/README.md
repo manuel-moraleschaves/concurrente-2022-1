@@ -40,18 +40,65 @@ Con respecto a la **Tarea03** donde se incorporó concurrencia por medio de la t
 Tal como lo muestra el gráfico, el tiempo de ejecución en las 3 corridas fue casi el mismo, aumentando únicamente *1s* entre cada una. El menor tiempo fue de *157.569 segundos*. La métrica speedup de esa corrida fue *2.175* y su eficiencia de *0.544* al calcularlo con respecto a la mejor ejecución de la versión serial.
 
 \
-De las anteriores mediciones se tomó la de menor tiempo de ejecución para cada Tarea y se creó el siguiente gráfico que permite realizar comparaciones con respecto al incremento de desempeño entre las métricas de las Tareas:
+De las mediciones anteriores se tomó la de menor tiempo de ejecución para cada Tarea y se creó el siguiente gráfico que permite realizar comparaciones con respecto al incremento de desempeño entre las métricas de las Tareas:
 
 ![img06](./tareas_grafico.png)
 
 Aquí se observa la forma en que el tiempo de ejecución disminuyó de *342.726 segundos* que tardaba en la solución serial de la Tarea01 hacia *248.746 segundos* en la solución concurrente con Pthreads de la Tarea02, hasta llegar a *157.569 segundos* en la ejecución de la Tarea03 con **OpenMP**.
 
-El speedup demuestra un incremento de la velocidad de *1.378 veces* al implementar Pthreads sobre la versión serial y un incremento de *2.175 veces* al utilizar **OpenMP*. Con respecto a la eficiencia, la Tarea02 logró un *34.4%*, mientras que la Tarea03 logró una eficiencia del *54.4%*.
+El speedup demuestra un incremento de la velocidad de *1.378 veces* al implementar Pthreads sobre la versión serial y un incremento de *2.175 veces* al utilizar **OpenMP**. Con respecto a la eficiencia, la Tarea02 logró un *34.4%*, mientras que la Tarea03 logró una eficiencia del *54.4%*.
 
 
 ## Comparación de grado de concurrencia
+Se realizó otra comparación utilizando diferentes grados de concurrencia (número de hilos). Para esta comparación se utilizó únicamente la solución de la **Tarea03** que hace uso de **OpenMP**.
 
+Al igual que en la sección anterior, todas las mediciones se realizaron en la misma máquina con las características descritas anteriormente y con el mismo archivo de prueba. Para cada escenario se efectuaron 3 corridas y en cada una de ellas se capturó la medición del tiempo que duró su ejecución y se registró en la siguiente [hoja de cálculo](./comparacion_grado_concurrencia.xlsx).
 
+\
+Para el **EscenarioA** que corresponde a utilizar un solo hilo (versión serial) se obtuvieron las siguientes métricas:
+
+![img07](./escenarioA_grafico.png)
+
+Como se observa en el gráfico, el tiempo de ejecución en las 3 corridas se mantuvo bastante similar, siendo *292.729 segundos* el más bajo. La métrica speedup y eficiencia se mantienen en *1* ya que al ser la versión serial son los valores base.
+
+\* Nótese que al ejecutar la versión de la Tarea03 de **OpenMP** con un solo hilo se obtuvo un menor tiempo de ejecución que la solución completamente serial de la Tarea01. Esto puede deberse a otro tipo de optimizaciones que se realizaron y que no tienen que ver propiamente con la concurrencia.
+
+\
+En el caso del **EscenarioB** se usó un número de hilos igual al número de cores de la máquina donde se ejecutó el programa (en este caso 4 hilos) y se obtuvieron las siguientes métricas:
+
+![img08](./escenarioB_grafico.png)
+
+Como se puede observar, el tiempo de ejecución fue aumentado en cada corrida, por lo que el menor tiempo se logró en la primera y fue de *158.701 segundos*. La métrica speedup fue *1.845* y su eficiencia de *0.461* al calcularlo con base en la mejor ejecución del EscenarioA.
+
+\
+Con respecto al **EscenarioC** se utilizó una cantidad de hilos igual a la mitad del número de cores que posee la máquina donde se ejecutó el programa (en este caso 2 hilos) y se obtuvieron las siguientes métricas:
+
+![img09](./escenarioC_grafico.png)
+
+Tal como lo muestra el gráfico, el tiempo de ejecución en la primera y tercera corrida fue casi el mismo, pero en la segunda aumentó *4s*. Por lo tanto, el menor tiempo fue de la primera corrida con *310.147 segundos*. La métrica speedup de esa corrida fue *0.944* y su eficiencia de *0.472* al calcularlo con respecto a la mejor ejecución del EscenarioA.
+
+\
+El **EscenarioD** correspondía en utilizar dos hilos por cada core que posea la máquina donde se ejecuta el programa (en este caso 8 hilos) y con esto se obtuvieron las siguientes métricas:
+
+![img10](./escenarioD_grafico.png)
+
+En este caso, el gráfico muestra que la segunda y tercera corrida fueron prácticamente igual, pero el menor tiempo de ejecución se logró en el primera corrida: *45.538 segundos*. Su métrica de speedup fue *6.428* y su eficiencia de *0.804* al calcularlo con base en la mejor ejecución del EscenarioA.
+
+\
+El último caso de prueba fue el **EscenarioE** en el cual se usó un número de hilos igual a la cantidad de columnas del tablero de juego multiplicado por el número de rotaciones de la primera figura basándose en el archivo de entrada (en este caso 20 hilos) y se obtuvieron las siguientes métricas:
+
+![img11](./escenarioE_grafico.png)
+
+Como se puede observar, se presentó casi el mismo tiempo de ejecución en la primera corrida y en la tercera y el mismo dismunuyó en la segunda corrida a *53.509 segundos*. La métrica speedup fue *5.471* y su eficiencia de *0.274* al calcularlo con base en la mejor ejecución del EscenarioA.
+
+\
+De las mediciones anteriores se tomó la de menor tiempo de ejecución para cada Escenario y se creó el siguiente gráfico que permite realizar comparaciones con respecto al grado de concurrencia:
+
+![img12](./escenarios_grafico.png)
+
+Aquí se observa que en el EscenarioA se obtuvo un tiempo de *292.729 segundos* con un único hilo y después disminuyó a *158.701 segundos* en el EscenarioB con 4 hilos. Al ejecutar el EscenarioC con 2 hilos el tiempo más bien aumentó a *310.147 segundos*, lo cual desmuestra que el hecho de aumentar un hilo no necesariamente significa un aumento en el desempeño. Posteriormente, se ejecutó el EscenarioD con 8 hilos y este duró apenas *45.538 segundos* ejecutándose. Por último, cuando se ejecutó el EscenarioE con 20 hilos el tiempo aumentó un poco a *53.509 segundos*.
+
+Al analizar el speedup se demuestra un incremento de la velocidad de *6.428 veces* en el EscenarioD.
 
 
 ## Nota Adicional
