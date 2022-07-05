@@ -1,4 +1,4 @@
-# Tarea02: [tetris_solver_pthreads]
+# Tarea03: [tetris_solver_omp]
  
 ## Descripción del problema
 
@@ -136,12 +136,22 @@ Z
 ```
 Si para un estado dado, el programa no pudo encontrar del todo una posición valida para colocar la figura correspondiente al nivel, entonces **no** se genera ningún archivo de salida para dicho nivel ni para los siguientes.
 
-El cálculo del mejor puntaje o jugada se realiza de forma concurrente utilizando hilos de ejecución que se reparten el trabajo. Dicha repartición de trabajo se realiza mediante un mapeo cíclico.
+El cálculo del mejor puntaje o jugada se realiza de forma concurrente utilizando hilos de ejecución que se reparten el trabajo, para dicha implementación se utiliza la tecnología de paralelismo de datos **OpenMP**. Comparado con Pthreads, con esta tecnología declarativa se implementó más fácilmente y en pocas líneas de código un mapeo cíclico que permite la repartición de las unidades de trabajo.
+
+
+## Diseño
+
+El diseño de esta solución está basado en el diseño de la Tarea02 y mantiene la gran parte del mismo. La principal diferencia radica en la sustitución del uso de la tecnología Pthreads por la tecnología **OpenMP**. A su vez, la Tarea02 está basada en la solución serial diseñada en la Tarea01.
+
+Para ver los detalles del diseño de la Tarea03, ingrese al siguiente [link](/design/README.md).
+Para ver los detalles del diseño de la Tarea02, ingrese al siguiente [link](../tetris_solver_pthreads/design/README.md).
+Para ver los detalles del diseño de la Tarea01, ingrese al siguiente [link](../tetris_solver_serial/design/README.md).
+
 
 ## Manual de uso
 Para compilar el programa se puede utilizar el makefile incluido de la siguiente manera:
 
-- Compilar normal
+- Compilación normal
 ```
 make
 ```
@@ -173,7 +183,7 @@ Para ejecutar el programa se debe enviar por parámetro la ruta del archivo de p
 
 Ejemplo:
 ```
-./bin/tetris_solver_omp ./test/Test3.txt 2
+./bin/tetris_solver_omp ./test/Test4.txt 8
 ```
 
 En caso de ejecutar el programa sin enviar el último parámetro se utilizará una cantidad de hilos igual a la cantidad de cores que posea la máquina donde se está ejecutando y en caso de no enviar ningún parámetro el programa tomará por default el archivo ./test/Test1.txt.
@@ -200,6 +210,53 @@ make helgrind
 ```
 
 Finalmente, el programa creará los archivos de salida correspondientes según lo mencionado anteriormente para cada uno de los niveles en los que se colocó una figura.
+
+
+## Pruebas
+
+Para verificar el correcto funcionamiento del programa, se crearon algunos casos de prueba en el folder `./test`:
+* Test1.txt: archivo inicial del tetris con profundidad de 1, 20 filas y 10 columnas.
+* Test2.txt: archivo inicial del tetris con profundidad de 6, 20 filas y 10 columnas.
+* Test3.txt: archivo inicial del tetris con profundidad de 10, 15 filas y 10 columnas.
+* Test4.txt: archivo inicial del tetris con profundidad de 10, 20 filas y 10 columnas.
+
+Se puede ejecutar el programa con alguno de los archivos anteriores utilizando el comando mostrado en el Manual de uso.
+
+### Valgrind y sanitizers
+
+También se utilizó valgrind y los sanitizers para comprobar el buen uso de la memoria y un buen uso de la concurrencia y estos son los resultados:
+
+* **asan**: no presenta errores.
+* **msan**: no presenta errores.
+* **tsan*: presenta posibles errores de DataRace relacionados a los métodos `clone_tetris()` y `clone_level()`. Se concluyó que esos errores son falsos positivos que muestra tsan al utilizar OpenMP ya que el segmento de código donde se llama a dichos métodos es completamente igual a como se implementó en la Tarea02 con Pthreads y en ese caso tsan no mostró ningún error. Además, con el fin de validar si se eliminaban esos errores se utilizó el constructo `omp critical` para llamar a esos métodos, pero de igual forma se siguieron presentando, por lo que se confirmó que se tratan de falsos positivos.
+* **ubsan**: no presenta errores.
+* **memcheck**: no presenta algún error como tal, pero sí muestra en el resumen final que podrían haber MemoryLeaks. Se revisó el código y se determinó que también se trata de falsos positivos ya que todos los objetos o punteros creados en el código se eliminan correctamente. Adicionalmente, la línea donde se muestran los errores corresponde al constructo `omp parallel for` por lo que se revisaron los ejemplos vistos en clase de OpenMP y se encontró que presentan exactamente el mismo mensaje, lo que indica que se debe a un falso positivo de memcheck al utilizar esa biblioteca.
+* **helgrind**: presenta los mismos falsos positivos que tsan y memcheck. Este mismo comportamiento ocurre en los ejemplos de OpenMP vistos en clase donde ambas herramientas muestran mensajes relacionados a los mismos falsos positivos.
+
+
+## Documento de reporte
+
+Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecución o en el rendimiento de la versión concurrente desarrollada en esta Tarea03 mediante el uso de la biblioteca OpenMP versus la versión serial desarrollada en la Tare01, así como con el objetivo de comparar esta tecnología versus la utilizada en la Tarea02 (Pthreads), se procedió a realizar algunas mediciones del tiempo transcurrido durante la ejecución de la parte más pesada del programa que es el cálculo de las mejores jugadas a través del algoritmo de DFS. Para esto se utilizó en la Tarea01 y Tarea02 la subrutina `_clock_gettime_` de Pthread, mientras que en la Tarea03 se utilizó la función `_omp_get_wtime_` de la biblioteca **OpenMP**.
+
+Se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados se resumen a continuación:
+
+Tarea01
+* SpeedUp: 1.000 (medición base)
+* Eificiencia: 1.000 (medición base)
+
+Tarea02
+* SpeedUp: 1.378
+* Eificiencia: 0.344
+
+Tarea03
+* SpeedUp: 2.175
+* Eificiencia: 0.544
+
+De lo anterior se puede concluir que tanto en la Tarea02 como en la Tarea03, se logró disminuir el tiempo de ejecución al implementar sobre la Tarea01 algún tipo de concurrencia y por ende se logró optimizar el rendimiento del programa.
+
+Por otra parte, se realizó otra comparación utilizando diferentes grados de concurrencia en la versión de la Tarea03 y se encontró que en una Máquina Virtual con Debian, 4 cores y 8 GB de Ram, el mejor rendimiento se obtiene con 8 hilos, es decir con el doble de los cores disponibles en el sistema.
+
+El detalle completo del Documento de reporte se puede encontrar en el siguiente [link](/report/README.md).
 
 
 ## Créditos
