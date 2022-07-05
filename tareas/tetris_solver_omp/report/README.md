@@ -55,7 +55,7 @@ Se realizó otra comparación utilizando diferentes grados de concurrencia (núm
 Al igual que en la sección anterior, todas las mediciones se realizaron en la misma máquina con las características descritas anteriormente y con el mismo archivo de prueba. Para cada escenario se efectuaron 3 corridas y en cada una de ellas se capturó la medición del tiempo que duró su ejecución y se registró en la siguiente [hoja de cálculo](./comparacion_grado_concurrencia.xlsx).
 
 \
-Para el **EscenarioA** que corresponde a utilizar un solo hilo (versión serial) se obtuvieron las siguientes métricas:
+Para el **EscenarioA** que correspondía a utilizar un solo hilo (versión serial) se obtuvieron las siguientes métricas:
 
 ![img07](./escenarioA_grafico.png)
 
@@ -68,7 +68,7 @@ En el caso del **EscenarioB** se usó un número de hilos igual al número de co
 
 ![img08](./escenarioB_grafico.png)
 
-Como se puede observar, el tiempo de ejecución fue aumentado en cada corrida, por lo que el menor tiempo se logró en la primera y fue de *158.701 segundos*. La métrica speedup fue *1.845* y su eficiencia de *0.461* al calcularlo con base en la mejor ejecución del EscenarioA.
+Como se puede observar, el tiempo de ejecución fue aumentando en cada corrida, por lo que el menor tiempo se logró en la primera y fue de *158.701 segundos*. La métrica speedup fue *1.845* y su eficiencia de *0.461* al calcularlo con base en la mejor ejecución del EscenarioA.
 
 \
 Con respecto al **EscenarioC** se utilizó una cantidad de hilos igual a la mitad del número de cores que posee la máquina donde se ejecutó el programa (en este caso 2 hilos) y se obtuvieron las siguientes métricas:
@@ -82,26 +82,28 @@ El **EscenarioD** correspondía en utilizar dos hilos por cada core que posea la
 
 ![img10](./escenarioD_grafico.png)
 
-En este caso, el gráfico muestra que la segunda y tercera corrida fueron prácticamente igual, pero el menor tiempo de ejecución se logró en el primera corrida: *45.538 segundos*. Su métrica de speedup fue *6.428* y su eficiencia de *0.804* al calcularlo con base en la mejor ejecución del EscenarioA.
+En este caso, el gráfico muestra que la segunda y tercera corrida fueron prácticamente igual, pero el menor tiempo de ejecución se logró en la primera corrida: *45.538 segundos*. Su métrica de speedup fue *6.428* y su eficiencia de *0.804* al calcularlo con base en la mejor ejecución del EscenarioA.
 
 \
 El último caso de prueba fue el **EscenarioE** en el cual se usó un número de hilos igual a la cantidad de columnas del tablero de juego multiplicado por el número de rotaciones de la primera figura basándose en el archivo de entrada (en este caso 20 hilos) y se obtuvieron las siguientes métricas:
 
 ![img11](./escenarioE_grafico.png)
 
-Como se puede observar, se presentó casi el mismo tiempo de ejecución en la primera corrida y en la tercera y el mismo dismunuyó en la segunda corrida a *53.509 segundos*. La métrica speedup fue *5.471* y su eficiencia de *0.274* al calcularlo con base en la mejor ejecución del EscenarioA.
+Como se puede observar, se presentó casi el mismo tiempo de ejecución en la primera y tercera corrida, pero el mismo disminuyó en la segunda corrida a *53.509 segundos*. La métrica speedup fue *5.471* y su eficiencia de *0.274* al calcularlo con base en la mejor ejecución del EscenarioA.
 
 \
 De las mediciones anteriores se tomó la de menor tiempo de ejecución para cada Escenario y se creó el siguiente gráfico que permite realizar comparaciones con respecto al grado de concurrencia:
 
 ![img12](./escenarios_grafico.png)
 
-Aquí se observa que en el EscenarioA se obtuvo un tiempo de *292.729 segundos* con un único hilo y después disminuyó a *158.701 segundos* en el EscenarioB con 4 hilos. Al ejecutar el EscenarioC con 2 hilos el tiempo más bien aumentó a *310.147 segundos*, lo cual desmuestra que el hecho de aumentar un hilo no necesariamente significa un aumento en el desempeño. Posteriormente, se ejecutó el EscenarioD con 8 hilos y este duró apenas *45.538 segundos* ejecutándose. Por último, cuando se ejecutó el EscenarioE con 20 hilos el tiempo aumentó un poco a *53.509 segundos*.
+Aquí se observa que en el EscenarioA se obtuvo un tiempo de *292.729 segundos* con un único hilo y después disminuyó a *158.701 segundos* en el EscenarioB con 4 hilos. Al ejecutar el EscenarioC con 2 hilos el tiempo más bien aumentó a *310.147 segundos*, lo cual desmuestra que el hecho de aumentar un hilo a a solución serial no necesariamente significa un incremento en el desempeño. Posteriormente, se ejecutó el EscenarioD con 8 hilos y este duró apenas *45.538 segundos* ejecutándose. Por último, cuando se ejecutó el EscenarioE con 20 hilos el tiempo aumentó un poco a *53.509 segundos*.
 
-Al analizar el speedup se demuestra un incremento de la velocidad de *6.428 veces* en el EscenarioD.
+El speedup demuestra un incremento en la velocidad de *1.845 veces* entre el EscenarioA (1 hilo) y el EscenarioB (4 hilos). El EscenarioC (2 hilos) presentó un decremento en la velocidad de *0.944 veces*, mientras que en el EscenarioD (8 hilos) se presentó el mayor aumento registrado en la velocidad y corresponde a *6.428 veces*. Finalmente, en el EscenarioE (20 hilos) aunque sí se dio un incremento de *5.471 veces* no fue tan bueno como utilizar únicamente 8 hilos. Lo anterior ejemplifica de muy buena manera que existe un punto óptimo de cantidad de hilos a utilizar y después de ahí, aunque tambień se logra disminuir el tiempo de ejecución con respecto a la solución serial, se está llevando a cabo con muchos más recursos de los requeridos por lo que están siendo desperdiciados.
+
+Ese último punto también se puede confirmar analizando la eficiencia. En el EscenarioD esta métrica fue de un *80.4%* pero para el EscenarioE fue de apenas *27.4%*, lo que significa que fue el Escenario más ineficiente de todos a pesar de que haya logrado el segundo mejor incremento en la velocidad de ejecución. Por otra parte, el EscenarioC tienen un *1.1%* más de eficiencia que el EscenarioB (*46.1% y *47.2%* respectivamente) aunque haya tardado casi el doble en el tiempo de ejecución y esto se debe a que logró ese tiempo con la mitad de recursos que el EscenarioB.
+
+De todo lo anterior, se puede concluir que el EscenarioD que utiliza 8 hilos de ejecución (el doble de la cantidad de cores que posee la máquina donde se ejecutaron las pruebas) es el escenario más óptimo para esta solución concurrente.
 
 
 ## Nota Adicional
-
-
-
+Durante el desarrollo y pruebas de la solución de la Tarea03 se identificó que a pesar de que la teoría y las mejores prácticas para construir aplicaciones concurrentes recomienden evitar el uso de controles de concurrencia, en algunas ocasiones se vuelve necesario aplicarlos para lograr una mayor optimización en la solución. Por ejemplo, el hecho de implementar un control de concurrencia como lo es un `omp critical` para consultar el mejor score que tiene en cierto momento el estado global del tetris y así evitar continuar a niveles más abajo de profundidad en el algoritmo recursivo, puede significar una disminución enorme en el tiempo de ejecución del programa comparado con las milésimas de segundo que podría tardar esa mínima serialización de un control de concurrencia.
