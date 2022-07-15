@@ -36,6 +36,11 @@ int main(int argc, char* args[]) {
 
         MPI_Send(&canPrint, 1, MPI_C_BOOL, nextRank, /*tag*/ 0, MPI_COMM_WORLD);
 
+        if (rank == 0) {
+            MPI_Recv(&canPrint, 1, MPI_C_BOOL, MPI_ANY_SOURCE, 0,
+                MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+
         MPI_Finalize();
     }
 
