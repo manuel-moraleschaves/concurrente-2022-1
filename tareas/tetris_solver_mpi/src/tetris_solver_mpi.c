@@ -18,6 +18,7 @@
 
 
 int main(int argc, char** argv) {
+    // Inicializar MPI
     if (MPI_Init(&argc, &argv) == MPI_SUCCESS) {
         int rank = -1;
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -29,6 +30,7 @@ int main(int argc, char** argv) {
         int const processor_count = omp_get_max_threads();
         int thread_count = processor_count;
 
+        // Validación de parámetros
         if (argc == 2) {
             if (sscanf(argv[1], "%s", file_name) != 1 || errno) {
                 if (rank <= 0) {
@@ -59,6 +61,7 @@ int main(int argc, char** argv) {
             return 4;
         }
 
+        // Archivo inicial del tetris
         if (rank <= 0) {
             printf("File Name: %s\n", file_name);
         }
@@ -122,7 +125,7 @@ int main(int argc, char** argv) {
 
             // Si solo hay 1 proceso o si el proceso actual obtuvo el mejor
             // puntaje, se crean los archivos y se imprime el tiempo
-            if (process_count <= 1 || i_got_min) {
+            if (process_count <= 1 || i_got_min == 1) {
                 // Generación de archivos finales
                 generate_files(tetris, tetris->levels);
 
@@ -143,6 +146,7 @@ int main(int argc, char** argv) {
             return 7;
         }
 
+        // Finalizar MPI
         MPI_Finalize();
     }
 

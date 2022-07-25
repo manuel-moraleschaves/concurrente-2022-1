@@ -53,7 +53,7 @@ int solve_tetris_dfs(tetris_t* tetris, int piece_index,
                 shared_min_height = base_tetris->min_height;
             }
 
-            if (calculate_height(tetris) > shared_min_height) {
+            if (calculate_height(tetris) >= shared_min_height) {
                 continue;
             }
 
@@ -121,7 +121,8 @@ void solve_tetris_omp(tetris_t* base_tetris, struct level_t* base_level,
     int num_rotations =
        get_tetris_figure_num_rotations(base_tetris->figure_sequence[1]);
 
-    // Se recorren las unidades de trabajo (columnas) segun un mapeo ciclico
+    // Se recorren las unidades de trabajo (columnas) segun un mapeo ciclico a
+    // nivel de hilos OpenMP
     #pragma omp parallel for num_threads(thread_count) default(none) \
          shared(base_tetris, base_level, num_rotations) schedule(static, 1)
     for (int col = 0; col < base_tetris->columns; col++) {
