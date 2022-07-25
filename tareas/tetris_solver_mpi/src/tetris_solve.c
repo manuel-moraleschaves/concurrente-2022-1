@@ -101,6 +101,23 @@ int solve_tetris_dfs(tetris_t* tetris, int piece_index,
 
 void solve_tetris_omp(tetris_t* base_tetris, struct level_t* base_level,
                   int thread_count) {
+     // Si la profundidad es 0
+    if (base_tetris->depth == 0) {
+        int current_height = calculate_height(base_tetris);
+
+        // Se actualiza la altura mínima alcanzada
+        if (current_height < base_tetris->min_height) {
+            base_tetris->min_height = current_height;
+
+            // Clona la secuencia de niveles hacia el estado del tetris
+            if (base_level) {
+                clone_level(base_level, base_tetris->levels,
+                            base_tetris->rows, base_tetris->columns);
+            }
+        }
+        return;
+    }
+
     int num_rotations =
        get_tetris_figure_num_rotations(base_tetris->figure_sequence[1]);
 
@@ -175,11 +192,10 @@ void solve_tetris_mpi(tetris_t* tetris, int thread_count) {
                     base_level->next->next = NULL;
                     if (base_level->next) {
                         // Llamado a rutina con OMP
-                        solve_tetris_omp(tetris, base_level, thread_count);
-
-                        // Remueve la figura colocada
-                        remove_figure(tetris, figure, num_row, col);
+                        solve_tetris_omp(tetris, base_level, thread_count);                        
                     }
+                    // Remueve la figura colocada
+                    remove_figure(tetris, figure, num_row, col);
                 }
                 // Remueve los niveles
                 destroy_levels(base_level, tetris->rows);
