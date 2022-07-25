@@ -5,7 +5,7 @@ SOURCES=$(wildcard $(DIRS:%=%/*.c))
 OBJECTS=$(SOURCES:%.c=build/%.o)
 EXEFILE=bin/$(APPNAME)
 
-CC=cc -std=gnu11
+CC=mpicc -std=gnu11
 CFLAGS=-Wall -Wextra
 LIBS= -fopenmp
 LIBS2= -lm
@@ -48,11 +48,11 @@ build/%.o: %.c | $$(@D)/.
 
 .PHONY: memcheck
 memcheck:
-	valgrind --leak-check=full --show-leak-kinds=all $(EXEFILE)
+	valgrind mpiexec -n 2 $(EXEFILE)
 
 .PHONY: helgrind
 helgrind:
-	valgrind --tool=helgrind --quiet $(EXEFILE)
+	valgrind --tool=helgrind --quiet mpiexec -n 2 $(EXEFILE)
 
 .PHONY: rebuild
 rebuild: clean $(EXEFILE)

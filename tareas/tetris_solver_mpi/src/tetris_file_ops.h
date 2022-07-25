@@ -12,9 +12,10 @@
  * @brief Rutina para leer el estado inicial del tetris.
  * @details Lee la información del archivo de entrada y crea el estado inicial del tetris.
  * @param file Puntero al archivo de entrada.
+ * @param rank Número del proceso actual.
  * @return Un puntero al estado inicial creado o NULL en caso de error.
  */
-tetris_t* read_tetris(FILE* file);
+tetris_t* read_tetris(FILE* file, int rank);
 
 /**
  * @brief Rutina para generar los archivos finales.

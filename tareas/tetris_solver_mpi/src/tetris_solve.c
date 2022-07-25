@@ -164,12 +164,14 @@ void solve_tetris_omp(tetris_t* base_tetris, struct level_t* base_level,
     }
 }
 
-void solve_tetris_mpi(tetris_t* tetris, int thread_count) {
+void solve_tetris_mpi(tetris_t* tetris, int thread_count, int rank,
+                      int process_count) {
     int num_rotations =
        get_tetris_figure_num_rotations(tetris->figure_sequence[0]);
 
-    // Se recorren las unidades de trabajo (columnas) segun un mapeo ciclico
-    for (int col = 0; col < tetris->columns; col++) {
+    // Cada proceso recorre sus unidades de trabajo (columnas) mediante un
+    // mapeo ciclico y tambien cada rotacion de la primera figura
+    for (int col = rank; col < tetris->columns; col+=process_count) {
         for (int rotation = 0; rotation < num_rotations; ++rotation) {
             figure_t* figure = get_tetris_figure(tetris->figure_sequence[0],
                                                  rotation);
@@ -192,7 +194,7 @@ void solve_tetris_mpi(tetris_t* tetris, int thread_count) {
                     base_level->next->next = NULL;
                     if (base_level->next) {
                         // Llamado a rutina con OMP
-                        solve_tetris_omp(tetris, base_level, thread_count);                        
+                        solve_tetris_omp(tetris, base_level, thread_count);
                     }
                     // Remueve la figura colocada
                     remove_figure(tetris, figure, num_row, col);

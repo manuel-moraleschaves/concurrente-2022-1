@@ -3,7 +3,7 @@
 #include "tetris_file_ops.h"
 #include "tetris_utils.h"
 
-tetris_t* read_tetris(FILE* file) {
+tetris_t* read_tetris(FILE* file, int rank) {
     tetris_t* tetris = malloc(sizeof(tetris_t));
 
     if ( tetris == NULL ) {
@@ -11,42 +11,54 @@ tetris_t* read_tetris(FILE* file) {
     }
 
     // Lectura del id
-    if (fscanf(file, "%zu", &tetris->id) == 0 || tetris->id <= 0) {
+    if ((fscanf(file, "%zu", &tetris->id) == 0 || tetris->id <= 0) &&
+            (rank <= 0)) {
         fprintf(stderr, "Error: invalid identifier in the file.\n");
         free(tetris);
         return NULL;
     }
-    printf("ID: %zu\n", tetris->id);
+    if (rank <= 0) {
+        printf("ID: %zu\n", tetris->id);
+    }
 
     // Lectura de la profundidad
-    if (fscanf(file, "%i", &tetris->depth) == 0 || tetris->depth < 0) {
+    if ((fscanf(file, "%i", &tetris->depth) == 0 || tetris->depth < 0) &&
+            (rank <= 0)) {
         fprintf(stderr, "Error: invalid depth in the file.\n");
         free(tetris);
         return NULL;
     }
-    printf("Depth: %d\n", tetris->depth);
+    if (rank <= 0) {
+        printf("Depth: %d\n", tetris->depth);
+    }
 
     // Lectura de la cantidad de filas
-    if (fscanf(file, "%i", &tetris->rows) == 0 || tetris->rows <= 0) {
+    if ((fscanf(file, "%i", &tetris->rows) == 0 || tetris->rows <= 0) &&
+            (rank <= 0)) {
         fprintf(stderr, "Error: invalid rows in the file.\n");
         free(tetris);
         return NULL;
     }
-    printf("Rows: %d\n", tetris->rows);
+    if (rank <= 0) {
+        printf("Rows: %d\n", tetris->rows);
+    }
 
     // Lectura de la cantidad de columnas
-    if (fscanf(file, "%i", &tetris->columns) == 0 || tetris->columns <= 0) {
+    if ((fscanf(file, "%i", &tetris->columns) == 0 || tetris->columns <= 0) &&
+            (rank <= 0)) {
         fprintf(stderr, "Error: invalid columns in the file.\n");
         free(tetris);
         return NULL;
     }
-    printf("Columns: %d\n", tetris->columns);
+    if (rank <= 0) {
+        printf("Columns: %d\n", tetris->columns);
+    }
 
     // Creación de la matriz
     tetris->matrix = (char**)create_matrix(tetris->rows,
                         tetris->columns + 1, sizeof(char));
 
-    if (!tetris->matrix) {
+    if (!tetris->matrix && rank <= 0) {
         fprintf(stderr, "Error: could not create the tetris matrix.\n");
         free(tetris);
         return NULL;
@@ -57,23 +69,27 @@ tetris_t* read_tetris(FILE* file) {
          fscanf(file, "%s", tetris->matrix[i]);
     }
 
-    print_matrix(tetris->rows, tetris->matrix);
+    if (rank <= 0) {
+        print_matrix(tetris->rows, tetris->matrix);
+    }
 
     // Lectura del contador de figuras cayendo
-    if (fscanf(file, "%i", &tetris->sequence_count) == 0
+    if ((fscanf(file, "%i", &tetris->sequence_count) == 0
         || tetris->sequence_count <= 0
-        || tetris->sequence_count < tetris->depth+1) {
+        || tetris->sequence_count < tetris->depth+1) && (rank <= 0)) {
         fprintf(stderr, "Error: invalid sequence count in the file.\n");
         free(tetris);
         return NULL;
     }
-    printf("K: %d\n", tetris->sequence_count);
+    if (rank <= 0) {
+        printf("K: %d\n", tetris->sequence_count);
+    }
 
     // Creación de la secuencia de figuras
     tetris->figure_sequence = (char*) calloc(tetris->sequence_count + 1,
                                 sizeof(char));
 
-    if (!tetris->figure_sequence) {
+    if (!tetris->figure_sequence && rank <= 0) {
         fprintf(stderr, "Error: could not create the figure sequence.\n");
         free(tetris);
         return NULL;
@@ -85,13 +101,15 @@ tetris_t* read_tetris(FILE* file) {
         tetris->figure_sequence[i] = getc(file);
     }
     tetris->figure_sequence[tetris->sequence_count] = '\0';
-    printf("Figure sequence: %s\n", tetris->figure_sequence);
+    if (rank <= 0) {
+        printf("Figure sequence: %s\n", tetris->figure_sequence);
+    }
 
     // Creación de los niveles
     tetris->levels = create_level('B', 0, tetris->rows, tetris->columns,
                                   tetris->matrix);
 
-    if (!tetris->levels) {
+    if (!tetris->levels && rank <= 0) {
         fprintf(stderr, "Error: could not create the levels.\n");
         free(tetris);
         return NULL;

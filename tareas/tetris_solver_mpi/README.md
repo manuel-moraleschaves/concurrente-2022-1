@@ -165,11 +165,6 @@ make
 make asan
 ```
 
-- Compilar msan
-```
-make msan
-```
-
 - Compilar tsan
 ```
 make tsan
@@ -231,11 +226,11 @@ Se puede ejecutar el programa con alguno de los archivos anteriores utilizando e
 También se utilizó valgrind y los sanitizers para comprobar el buen uso de la memoria y un buen uso de la concurrencia y estos son los resultados:
 
 * **asan**: no presenta errores.
-* **msan**: no presenta errores.
+* **msan**: no se puede compilar al utilizar **MPI**.
 * **tsan**: presenta los mismos posibles errores de DataRace relacionados a los métodos `clone_tetris()` y `clone_level()` que se identificaron en la [Tarea03](../tetris_solver_omp/README.md#valgrind-y-sanitizers) como falsos positivos al utilizar **OpenMP**.
 * **ubsan**: no presenta errores.
-* **memcheck**: no presenta algún error como tal, pero muestra en el resumen final que podrían existir los mismos MemoryLeaks de la [Tarea03](../tetris_solver_omp/README.md#valgrind-y-sanitizers) y que se concluyó que se trata de falsos positivos relacionados al constructo `omp parallel for` de **OpenMP**.
-* **helgrind**: presenta los mismos falsos positivos que tsan y memcheck.
+* **memcheck**: no presenta errores.
+* **helgrind**: no presenta errores.
 
 
 ## Documento de reporte

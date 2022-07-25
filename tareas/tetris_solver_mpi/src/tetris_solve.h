@@ -38,8 +38,11 @@ void solve_tetris_omp(tetris_t* base_tetris, struct level_t* base_level,
  * @details Recorre el nivel 0 y llama a la rutina del nivel 1.
  * @param tetris Puntero al estado inicial del tetris.
  * @param thread_count Cantidad de hilos.
+ * @param rank Número del proceso actual.
+ * @param process_count Cantidad de procesos totales.
  * @return void.
  */
-void solve_tetris_mpi(tetris_t* tetris, int thread_count);
+void solve_tetris_mpi(tetris_t* tetris, int thread_count, int rank,
+                      int process_count);
 
 #endif
