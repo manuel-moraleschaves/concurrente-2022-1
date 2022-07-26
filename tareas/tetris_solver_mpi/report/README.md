@@ -3,7 +3,7 @@ Se realizaron algunas mediciones del tiempo que tarda la [Tarea03](../../tetris_
 
 Para realizar esa medición se utilizó el archivo `Test4.txt` que se encuentra en el folder `/test`, el cual corresponde a un estado de tetris inicial con una profundidad de 10, con 20 filas y 10 columnas. Ese mismo archivo fue el utilizado en las pruebas de la Tarea03.
 
-Todas las pruebas se llevaron a cabo en el [Clúster Kabré](https://kabre.cenat.ac.cr/) bajo la partición **NU** que está compuesta de 32 nodos Intel Xeon Phi KNL, cada uno con 64 núcleos a 1,3 GHz y 96 GB de RAM.
+Todas las pruebas se llevaron a cabo en el [Clúster Kabré](https://kabre.cenat.ac.cr/) bajo la partición **NU** que está compuesta de 32 nodos Intel Xeon Phi KNL, cada uno con 64 núcleos a 1,3 GHz y 96 GB de RAM. Se adjunta un ejemplo del archivo [.slurm](../job.slurm) utilizado durante las pruebas para enviar solicitudes de trabajo en el clúster utilizando **MPI**.
 
 
 ## Comparación de rendimiento
