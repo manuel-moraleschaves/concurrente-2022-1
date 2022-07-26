@@ -11,7 +11,7 @@ Como se puede apreciar, existen 3 estructuras de datos básicas que representan 
 ## Diagrama de repartición de trabajo entre procesos
 La repartición del trabajo entre los procesos y/o nodos se realiza mediante un mapeo cíclico, donde cada proceso efectuará el cálculo de una columna específica y para cada rotación del nivel de profundidad 0. A su vez, cada proceso internamente realizará el cálculo del nivel 1 y posteriores niveles mediante el uso de **OpenMP**, tal como se explicará en la siguiente sección.
 
-Este diagrama ejemplifica ese mapeo dinámico entre procesos:
+Este diagrama ejemplifica ese mapeo cíclico entre procesos:
 
 ![img2](./mapeo_procesos.png)
 
@@ -25,7 +25,7 @@ Lo anterior se resume en el siguiente diagrama:
 
 
 ## Diagrama de repartición de trabajo entre hilos
-La repartición del trabajo entre los hilos de ejecución se realiza a través de un mapeo cíclico, donde cada hilo efectuará el cálculo de una columna específica y para cada rotación del nivel 1. Cada unidad de trabajo corresponde a una columna del tablero y se recorrerá recursivamente cada posible jugada para calcular el mejor score según la profundidad definida. De forma cíclica, cada hilo tomará la siguiente columna que le corresponde según el tamaño del tablero. Esto se puede realizar en pocas líneas de código utilizando el constructo `omp parallel for ... schedule(static, 1)`.
+La repartición del trabajo entre los hilos de ejecución se realiza a través de un mapeo cíclico, donde cada hilo efectuará el cálculo de una columna específica y para cada rotación del nivel 1. Cada unidad de trabajo corresponde a una columna del tablero y se recorrerá recursivamente cada posible jugada para calcular el mejor score según la profundidad definida. De forma cíclica, cada hilo tomará la siguiente columna que le corresponde según el tamaño del tablero. Esto se puede realizar en pocas líneas de código utilizando el constructo de **OpenMP** `omp parallel for ... schedule(static, 1)`.
 
 En el siguiente diagrama se puede apreciar la repartición del trabajo entre los hilos:
 
@@ -35,7 +35,7 @@ En el siguiente diagrama se puede apreciar la repartición del trabajo entre los
 ## Descripción general
 Esta solución se basa principalmente en la ejecución recursiva de una rutina que intenta encontrar una posición válida donde pueda colocar cada una de las piezas que "van cayendo", según la profundidad dada. Esto se realiza mediante fuerza bruta y a través de un algoritmo de Búsqueda en Profundidad (Depth First Search) que permite colocar todas las piezas de la secuencia en sus diferentes rotaciones y en diferentes posiciones para calcular el puntaje de la jugada en el nivel más abajo (hoja del árbol) con el fin de poder comparar dicho puntaje con el mejor puntaje que se tenga hasta el momento y poder así determinar si una jugada es mejor que la otra. En caso de haber encontrado una mejor jugada, se almacena en memoria la información del nivel bajo la estructura de una cola al insertar el nuevo nodo como un hijo o como el nodo siguiente del nivel actual, esto permite llevar el rastreo o tracking de la pieza colocada en cada nivel. El puntaje de las jugadas está basado en el cálculo de la altura mínima que tiene el tablero del tetris después de colocar una pieza.
 
-Lo anterior es llevado a cabo de forma distribuida entre varios nodos/procesos a través de la tecnología **MPI** y de forma concurrente por varios hilos de ejecución implementados con la tecnología **OpenMP** que se reparten el trabajo según lo descrito anteriormente y de esa manera encontrar más rápido la mejor solución.
+Lo anterior es llevado a cabo de forma distribuida entre varios nodos/procesos a través de la tecnología **MPI** y de forma concurrente por varios hilos de ejecución implementados con la tecnología **OpenMP** que se reparten el trabajo según lo descrito anteriormente para encontrar más rápido la mejor solución.
 
 De forma general, estos son los pasos que ejecuta el programa principal:
 1. Carga los parámetros recibidos y lee el archivo de entrada.
