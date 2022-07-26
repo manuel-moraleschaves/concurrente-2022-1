@@ -145,7 +145,7 @@ Por lo anterior, el objetivo de la Tarea04 es distribuir el trabajo del solucion
 
 ## Diseño
 
-El diseño de esta solución está basado en el diseño de la Tarea03 y mantiene gran parte del mismo. La principal diferencia radica en la incorporación del uso de la tecnología **MPI** para distribuir el trabajo entre varios procesos/nodos de forma cílica. A su vez, la Tarea03 está basada en la Tarea02 y ésta se basa en la solución serial diseñada en la Tarea01.
+El diseño de esta solución está basado en el diseño de la Tarea03 y mantiene gran parte del mismo. La principal diferencia radica en la incorporación del uso de la tecnología **MPI** para distribuir el trabajo entre varios procesos/nodos de forma cíclica. A su vez, la Tarea03 está basada en la Tarea02 y ésta se basa en la solución serial diseñada en la Tarea01.
 
 Para ver los detalles del diseño de la Tarea04, ingrese al siguiente [link](../tetris_solver_mpi/design/README.md).
 
@@ -157,24 +157,24 @@ Para ver los detalles del diseño de la Tarea01, ingrese al siguiente [link](../
 
 
 ## Manual de uso
-Para compilar el programa se debe tener instalado el paquete de Linux `mpich`. Una vez instalado, se puede compilar el programa utilizando el makefile incluido de la siguiente manera:
+Para compilar el programa se debe tener instalado el paquete de Linux `mpich`. Una vez instalado, se puede compilar el programa utilizando el Makefile incluido de la siguiente manera:
 
 - Compilación normal
 ```
 make
 ```
 
-- Compilar con asan
+- Compilar asan
 ```
 make asan
 ```
 
-- Compilar con tsan
+- Compilar tsan
 ```
 make tsan
 ```
 
-- Compilar con ubsan
+- Compilar ubsan
 ```
 make ubsan
 ```
@@ -187,7 +187,7 @@ Para ejecutar el programa normalmente se debe enviar por parámetro la ruta del 
 Para ejecutar el programa de forma distribuida entre procesos se debe utilizar el comando `mpiexec -n nodes_count` antes del llamado normal del programa. Donde `nodes_count` corresponde a la cantidad de procesos que ejecutarán el programa.
 Por ejemplo:
 ```
-mpiexec -n 4 ./bin/tetris_solver_mpi test/Test4.txt 8
+mpiexec -n 4 ./bin/tetris_solver_mpi ./test/Test4.txt 8
 ```
 
 \* En caso de ejecutar el programa sin enviar el último parámetro se utilizará una cantidad de hilos igual a la cantidad de cores que posea la máquina donde se está ejecutando y en caso de no enviar ningún parámetro el programa tomará por default el archivo ./test/Test1.txt.
@@ -213,7 +213,7 @@ make
 make helgrind
 ```
 
-Finalmente, el programa correrá y al finalizar el nodo que obtuvo el mejor puntaje creará los archivos de salida correspondientes según lo mencionado anteriormente para cada uno de los niveles en los que se colocó una figura.
+Por último, cuando el programa finalice su ejecución, el nodo que obtuvo el mejor puntaje creará los archivos de salida correspondientes según lo mencionado anteriormente para cada uno de los niveles en los que se colocó una figura.
 
 
 ## Pruebas
@@ -240,7 +240,7 @@ También se utilizó valgrind y los sanitizers para comprobar el buen uso de la 
 
 ## Documento de reporte
 
-Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecución o en el rendimiento de la versión concurrente desarrollada en la Tarea03 mediante el uso de la biblioteca **OpenMP** versus la versión distribuida desarrollada en esta Tare04 con **MPI**, se procedió a realizar algunas mediciones del tiempo transcurrido del programa. Con esos datos, se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados se resumen a continuación:
+Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecución o en el rendimiento de la versión concurrente desarrollada en la Tarea03 mediante el uso de la biblioteca **OpenMP** versus la versión distribuida desarrollada en esta Tarea04 con **MPI**, se procedió a realizar algunas mediciones del tiempo transcurrido del programa. Con esos datos, se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados se resumen a continuación:
 
 **Tarea03**
 * Tiempo: *112.3 segundos*
@@ -253,9 +253,9 @@ Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecuci
 * Eficiencia: *2.1*
 
 
-De esto y de lo presentado en las Tareas anteriores, se puede concluir que se logró disminuir el tiempo de ejecución al implementar sobre la Tarea01 concurrencia a nivel de hilos con **OpenMP** (Tarea03) y a su vez se logró optimizar muchísimo más el rendimiento del programa en esta Tarea04 a través de programación distribuida utilizando **MPI**.
+De esto y de lo presentado en las Tareas anteriores, se puede concluir que se logró disminuir el tiempo de ejecución de la Tarea01 al implementar concurrencia a nivel de hilos con **OpenMP** (Tarea03) y a su vez se logró optimizar muchísimo más el rendimiento del programa en esta Tarea04 a través de programación distribuida utilizando **MPI**.
 
-El detalle completo del Documento de reporte se puede encontrar en el siguiente [link](../tetris_solver_mpi/report/README.md).
+El detalle completo del Documento de reporte se encuentra en el siguiente [link](../tetris_solver_mpi/report/README.md).
 
 
 ## Créditos
