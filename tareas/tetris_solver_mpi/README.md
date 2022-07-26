@@ -136,12 +136,16 @@ Z
 ```
 Si para un estado dado, el programa no pudo encontrar del todo una posición valida para colocar la figura correspondiente al nivel, entonces **no** se genera ningún archivo de salida para dicho nivel ni para los siguientes.
 
-El cálculo del mejor puntaje o jugada se realiza de forma distribuida entre procesos mediante la biblioteca **MPI** y de forma concurrente en cada proceso utilizando hilos de ejecución que se reparten el trabajo, para dicha implementación se utiliza la tecnología de paralelismo de datos **OpenMP**.
+
+## Descripción de la Tarea04
+En las tareas anteriores se desarrollaron programas que determinan la jugada óptima de un estado de juego de tetris de forma serial (Tarea01), concurrente con Pthreads (Tarea02) y con OpenMP (Tarea03), además de realizar comparaciones de rendimiento. Esas soluciones aprovechan los recursos concurrentes de una máquina, pero no escalan, ni aprovechan varias computadoras disponibles o un clúster de computadoras.
+
+Por lo anterior, el objetivo de la Tarea04 es distribuir el trabajo del solucionador de tetris entre varias máquinas usando la tecnología **MPI**. El cálculo del mejor puntaje o jugada se realiza de forma distribuida entre procesos mediante dicha biblioteca y de forma concurrente dentro de cada proceso utilizando hilos de ejecución que se reparten el trabajo, para dicha implementación se utiliza la tecnología de paralelismo de datos **OpenMP**.
 
 
 ## Diseño
 
-El diseño de esta solución está basado en el diseño de la Tarea03 y mantiene la gran parte del mismo. La principal diferencia radica en la incorporación del uso de la tecnología **MPI**. A su vez, la Tarea03 está basada en la Tarea02 y esa en solución serial diseñada en la Tarea01.
+El diseño de esta solución está basado en el diseño de la Tarea03 y mantiene gran parte del mismo. La principal diferencia radica en la incorporación del uso de la tecnología **MPI** para distribuir el trabajo entre varios procesos/nodos de forma cílica. A su vez, la Tarea03 está basada en la Tarea02 y ésta se basa en la solución serial diseñada en la Tarea01.
 
 Para ver los detalles del diseño de la Tarea04, ingrese al siguiente [link](../tetris_solver_mpi/design/README.md).
 
@@ -153,39 +157,40 @@ Para ver los detalles del diseño de la Tarea01, ingrese al siguiente [link](../
 
 
 ## Manual de uso
-Para compilar el programa se puede utilizar el makefile incluido de la siguiente manera:
+Para compilar el programa se debe tener instalado el paquete de Linux `mpich`. Una vez instalado, se puede compilar el programa utilizando el makefile incluido de la siguiente manera:
 
 - Compilación normal
 ```
 make
 ```
 
-- Compilar asan
+- Compilar con asan
 ```
 make asan
 ```
 
-- Compilar tsan
+- Compilar con tsan
 ```
 make tsan
 ```
 
-- Compilar ubsan
+- Compilar con ubsan
 ```
 make ubsan
 ```
 
-Para ejecutar el programa se debe enviar por parámetro la ruta del archivo de pruebas que se quiere utilizar y la cantidad de hilos que se desean crear. Se debe respetar la siguiente estructura:
+Para ejecutar el programa normalmente se debe enviar por parámetro la ruta del archivo de pruebas que se quiere utilizar y la cantidad de hilos que se desean crear. Se debe respetar la siguiente estructura:
 ```
 ./bin/tetris_solver_mpi ruta_archivo cantidad_hilos
 ```
 
-Ejemplo:
+Para ejecutar el programa de forma distribuida entre procesos se debe utilizar el comando `mpiexec -n nodes_count` antes del llamado normal del programa. Donde `nodes_count` corresponde a la cantidad de procesos que ejecutarán el programa.
+Por ejemplo:
 ```
-./bin/tetris_solver_mpi ./test/Test4.txt 8
+mpiexec -n 4 ./bin/tetris_solver_mpi test/Test4.txt 8
 ```
 
-En caso de ejecutar el programa sin enviar el último parámetro se utilizará una cantidad de hilos igual a la cantidad de cores que posea la máquina donde se está ejecutando y en caso de no enviar ningún parámetro el programa tomará por default el archivo ./test/Test1.txt.
+\* En caso de ejecutar el programa sin enviar el último parámetro se utilizará una cantidad de hilos igual a la cantidad de cores que posea la máquina donde se está ejecutando y en caso de no enviar ningún parámetro el programa tomará por default el archivo ./test/Test1.txt.
 \
 \
 También, se pueden utilizar los siguientes comandos adicionales:
@@ -208,7 +213,7 @@ make
 make helgrind
 ```
 
-Finalmente, el programa creará los archivos de salida correspondientes según lo mencionado anteriormente para cada uno de los niveles en los que se colocó una figura.
+Finalmente, el programa correrá y al finalizar el nodo que obtuvo el mejor puntaje creará los archivos de salida correspondientes según lo mencionado anteriormente para cada uno de los niveles en los que se colocó una figura.
 
 
 ## Pruebas
@@ -226,7 +231,7 @@ Se puede ejecutar el programa con alguno de los archivos anteriores utilizando e
 También se utilizó valgrind y los sanitizers para comprobar el buen uso de la memoria y un buen uso de la concurrencia y estos son los resultados:
 
 * **asan**: no presenta errores.
-* **msan**: no se puede compilar al utilizar **MPI**.
+* **msan**: no se logró compilar al utilizar **MPI**.
 * **tsan**: presenta los mismos posibles errores de DataRace relacionados a los métodos `clone_tetris()` y `clone_level()` que se identificaron en la [Tarea03](../tetris_solver_omp/README.md#valgrind-y-sanitizers) como falsos positivos al utilizar **OpenMP**.
 * **ubsan**: no presenta errores.
 * **memcheck**: no presenta errores.
@@ -238,15 +243,17 @@ También se utilizó valgrind y los sanitizers para comprobar el buen uso de la 
 Con el fin de evaluar si se logró obtener alguna mejora en el tiempo de ejecución o en el rendimiento de la versión concurrente desarrollada en la Tarea03 mediante el uso de la biblioteca **OpenMP** versus la versión distribuida desarrollada en esta Tare04 con **MPI**, se procedió a realizar algunas mediciones del tiempo transcurrido del programa. Con esos datos, se calculó el **SpeedUp** y la **Eficiencia** para cada Tarea y los resultados se resumen a continuación:
 
 **Tarea03**
-* SpeedUp: *2.175*
-* Eficiencia: *0.544*
+* Tiempo: *112.3 segundos*
+* SpeedUp: *1.000 (medición base)*
+* Eficiencia: *1.000 (medición base)*
 
 **Tarea04**
-* SpeedUp: *2.175*
-* Eficiencia: *0.544*
+* Tiempo: *13.2 segundos*
+* SpeedUp: *8.5*
+* Eficiencia: *2.1*
 
 
-De lo anterior se puede concluir que en la Tarea03 se logró disminuir el tiempo de ejecución al implementar sobre la Tarea01 concurrencia a nivel de hilos con **OpenMP** y a su vez se logró optimizar aún más el rendimiento del programa a través de programación distribuida mediante **MPI**.
+De esto y de lo presentado en las Tareas anteriores, se puede concluir que se logró disminuir el tiempo de ejecución al implementar sobre la Tarea01 concurrencia a nivel de hilos con **OpenMP** (Tarea03) y a su vez se logró optimizar muchísimo más el rendimiento del programa en esta Tarea04 a través de programación distribuida utilizando **MPI**.
 
 El detalle completo del Documento de reporte se puede encontrar en el siguiente [link](../tetris_solver_mpi/report/README.md).
 
